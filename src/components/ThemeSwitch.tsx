@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { FiSun, FiMoon } from 'react-icons/fi';
 
 export function ThemeSwitch() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
 
   const toggleTheme = useCallback(() => setDark((prev) => !prev), []);
 
