@@ -21,7 +21,7 @@ export default function Home() {
         <div className="flex flex-col-reverse lg:flex-row items-center gap-8 lg:gap-16">
           <div>
             <h1 className="text-2xl lg:text-5xl font-bold text-primary text-center lg:text-start">
-              twlite
+              Twilight
             </h1>
             <TypeWriter
               className="text-xl lg:text-xl"
