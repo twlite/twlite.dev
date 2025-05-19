@@ -1,12 +1,12 @@
 import type React from 'react';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Poppins } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/header';
 import { ThemeProvider } from '@/components/theme-provider';
 import Footer from '@/components/footer';
 
-const inter = Inter({ subsets: ['latin'] });
+const poppins = Poppins({ subsets: ['latin'], weight: ['400', '600', '700'] });
 
 export const metadata: Metadata = {
   title: 'Twilight',
@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning suppressContentEditableWarning>
-      <body className={inter.className}>
+      <body className={`${poppins.className} scroll-smooth`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

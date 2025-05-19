@@ -2,6 +2,13 @@ import React from 'react';
 import Link from 'next/link';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import rehypePrettyCode, { Options } from 'rehype-pretty-code';
+import rehypeSlug from 'rehype-slug';
+import { JetBrains_Mono } from 'next/font/google';
+
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+});
 
 function Heading({
   level,
@@ -17,9 +24,13 @@ function Heading({
   return React.createElement(
     tag,
     props,
-    <a href={`#${props.id}`} className="no-underline">
-      {children}
-    </a>
+    props.id ? (
+      <a href={`#${props.id}`} className="no-underline">
+        {children}
+      </a>
+    ) : (
+      children
+    )
   );
 }
 
@@ -43,6 +54,9 @@ const components = {
   h4: (props: React.ComponentProps<'h1'>) => <Heading level={4} {...props} />,
   h5: (props: React.ComponentProps<'h1'>) => <Heading level={5} {...props} />,
   h6: (props: React.ComponentProps<'h1'>) => <Heading level={6} {...props} />,
+  code: (props: React.ComponentProps<'code'>) => (
+    <code {...props} className={`${jetBrainsMono.className}`} />
+  ),
 };
 
 interface MDXContentProps {
@@ -57,6 +71,7 @@ export function MDXContent({ source }: MDXContentProps) {
       options={{
         mdxOptions: {
           rehypePlugins: [
+            rehypeSlug,
             [
               rehypePrettyCode,
               {
