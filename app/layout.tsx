@@ -5,6 +5,7 @@ import './globals.css';
 import Header from '@/components/header';
 import { ThemeProvider } from '@/components/theme-provider';
 import Footer from '@/components/footer';
+import { Analytics } from '@vercel/analytics/next';
 
 const poppins = Poppins({ subsets: ['latin'], weight: ['400', '600', '700'] });
 
@@ -35,6 +36,7 @@ export default function RootLayout({
           {children}
           <Footer />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
