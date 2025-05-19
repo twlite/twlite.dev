@@ -1,31 +1,41 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import Header from "@/components/header"
-import { ThemeProvider } from "@/components/theme-provider"
+import type React from 'react';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import Header from '@/components/header';
+import { ThemeProvider } from '@/components/theme-provider';
+import Footer from '@/components/footer';
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Twilight | Developer Portfolio",
-  description: "Personal portfolio website for Twilight (twlite)",
-    generator: 'v0.dev'
-}
+  title: 'Twilight',
+  description:
+    'Twilight is a software developer specializing in web development.',
+  keywords: 'twilight, software developer, web development, programming',
+  creator: 'Twilight',
+  icons: 'https://github.com/twlite.png',
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning suppressContentEditableWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange={false}
+        >
           <Header />
           {children}
+          <Footer />
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

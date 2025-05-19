@@ -60,7 +60,13 @@
 
 .animated-gradient-text {
   @apply bg-clip-text text-transparent;
-  background-image: linear-gradient(to right, #d946ef, #6366f1, #8b5cf6, #d946ef);
+  background-image: linear-gradient(
+    to right,
+    #d946ef,
+    #6366f1,
+    #8b5cf6,
+    #d946ef
+  );
   background-size: 300% auto;
   animation: gradient 8s ease infinite;
 }
@@ -84,7 +90,7 @@
 }
 
 .gradient-border::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   padding: 1px;
@@ -105,7 +111,7 @@
 }
 
 .gradient-card::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
@@ -120,14 +126,24 @@
 }
 
 /* Code block styling */
-.prose pre {
-  @apply bg-muted/50 dark:bg-muted/20 border border-border;
+figure > pre {
+  padding: 0px !important;
 }
 
-.prose code {
-  @apply text-primary dark:text-primary-foreground bg-muted/50 dark:bg-muted/20 px-1 py-0.5 rounded;
+figure > pre > code {
+  padding: 1rem !important;
 }
 
-.prose pre code {
-  @apply bg-transparent p-0 text-sm;
+code[data-theme*=' '],
+code[data-theme*=' '] span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  code[data-theme*=' '],
+  code[data-theme*=' '] span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
 }

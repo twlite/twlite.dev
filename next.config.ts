@@ -1,6 +1,6 @@
-import createMDX from '@next/mdx'
+import createMDX from '@next/mdx';
+import { NextConfig } from 'next';
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   eslint: {
@@ -10,22 +10,21 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['github.com', 'vusercontent.net'],
+    domains: ['github.com'],
     unoptimized: true,
   },
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
-}
+  experimental: {
+    mdxRs: false,
+  },
+} satisfies NextConfig;
 
 const withMDX = createMDX({
   extension: /\.mdx?$/,
   options: {
-    remarkPlugins: [
-      // Add remark plugins if needed
-    ],
-    rehypePlugins: [
-      // Add rehype plugins if needed
-    ],
+    remarkPlugins: [],
+    rehypePlugins: [],
   },
-})
+});
 
-export default withMDX(nextConfig)
+export default withMDX(nextConfig);

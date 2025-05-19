@@ -1,39 +1,43 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { FaEnvelope, FaPaperPlane } from "react-icons/fa"
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { FaEnvelope, FaPaperPlane } from 'react-icons/fa';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  })
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Create mailto link with form data
     const mailtoLink = `mailto:hello@twlite.dev?subject=${encodeURIComponent(
-      formData.subject || "Contact from Portfolio",
-    )}&body=${encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`)}`
+      formData.subject || 'Contact from Portfolio'
+    )}&body=${encodeURIComponent(
+      `Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`
+    )}`;
 
     // Open default email client
-    window.location.href = mailtoLink
-  }
+    window.location.href = mailtoLink;
+  };
 
   return (
     <section id="contact" className="py-20 px-4">
@@ -70,13 +74,17 @@ export default function Contact() {
               </div>
               <div className="pt-4">
                 <p className="text-muted-foreground">
-                  I'm always interested in hearing about new projects and opportunities. Whether you have a question or
-                  just want to say hi, I'll try my best to get back to you as soon as possible!
+                  I'm always interested in hearing about new projects and
+                  opportunities. Whether you have a question or just want to say
+                  hi, I'll try my best to get back to you as soon as possible!
                 </p>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4 border p-4 rounded-lg bg-card/50 backdrop-blur-sm border-border/50"
+            >
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input
@@ -123,12 +131,12 @@ export default function Contact() {
                 />
               </div>
               <Button type="submit" className="w-full">
-                Send Message <FaPaperPlane className="ml-2 h-4 w-4" />
+                Send Message
               </Button>
             </form>
           </div>
         </motion.div>
       </div>
     </section>
-  )
+  );
 }
