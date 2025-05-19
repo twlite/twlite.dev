@@ -1,10 +1,8 @@
 ---
-title: "Building Modern Websites with Next.js"
-date: "2023-02-15"
-excerpt: "Explore the benefits of using Next.js for your web projects and learn how to get started with this powerful React framework."
+title: 'Building Modern Websites with Next.js'
+date: '2023-02-15'
+description: 'Explore the benefits of using Next.js for your web projects and learn how to get started with this powerful React framework.'
 ---
-
-# Building Modern Websites with Next.js
 
 Next.js has become one of the most popular frameworks for building React applications. In this post, I'll explore why Next.js is a great choice for modern web development and how to get started.
 
@@ -58,12 +56,12 @@ async function getProducts() {
 
 export default async function ProductsPage() {
   const products = await getProducts();
-  
+
   return (
     <div>
       <h1>Products</h1>
       <ul>
-        {products.map(product => (
+        {products.map((product) => (
           <li key={product.id}>{product.name}</li>
         ))}
       </ul>

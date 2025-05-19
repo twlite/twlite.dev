@@ -58,7 +58,7 @@ async function BlogContent() {
                     <h2 className="text-2xl font-semibold">{post.title}</h2>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground">{post.excerpt}</p>
+                    <p className="text-muted-foreground">{post.description}</p>
                   </CardContent>
                   <CardFooter>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">

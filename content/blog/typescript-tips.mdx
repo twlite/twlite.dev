@@ -1,10 +1,8 @@
 ---
-title: "Essential TypeScript Tips for Better Code"
-date: "2023-03-20"
-excerpt: "Improve your TypeScript skills with these practical tips and best practices for writing cleaner, more maintainable code."
+title: 'Essential TypeScript Tips for Better Code'
+date: '2023-03-20'
+description: 'Improve your TypeScript skills with these practical tips and best practices for writing cleaner, more maintainable code.'
 ---
-
-# Essential TypeScript Tips for Better Code
 
 TypeScript has become an essential tool for JavaScript developers. Here are some tips to help you write better TypeScript code.
 
@@ -69,7 +67,7 @@ Use type guards to narrow types within conditional blocks:
 
 ```typescript
 function processValue(value: string | number) {
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     // TypeScript knows value is a string here
     return value.toUpperCase();
   } else {
@@ -89,11 +87,9 @@ function getFirstItem<T>(array: T[]): T | undefined {
 }
 
 const firstNumber = getFirstItem([1, 2, 3]); // Type: number
-const firstString = getFirstItem(["a", "b", "c"]); // Type: string
+const firstString = getFirstItem(['a', 'b', 'c']); // Type: string
 ```
 
 ## Conclusion
 
 TypeScript can significantly improve your development experience by catching errors early and providing better tooling. By following these tips, you'll write more maintainable and robust code.
-
-What are your favorite TypeScript tips? Let me know in the comments!

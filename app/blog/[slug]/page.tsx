@@ -3,6 +3,7 @@ import { getAllPosts, getPostBySlug } from '@/lib/blog';
 import Link from 'next/link';
 import { FaCalendarAlt, FaClock } from 'react-icons/fa';
 import { MDXContent } from '@/components/mdx-components';
+import { Metadata } from 'next';
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
@@ -17,12 +18,17 @@ export async function generateMetadata({
   params: { slug: string };
 }) {
   try {
-    const { excerpt, title } = await getPostBySlug((await params).slug);
+    const { description, title, tags } = await getPostBySlug(
+      (
+        await params
+      ).slug
+    );
 
     return {
-      title: `${title} | Twilight`,
-      description: excerpt || '',
-    };
+      title,
+      description: description || `Read my thoughts on ${title}`,
+      keywords: tags,
+    } satisfies Metadata;
   } catch (error) {
     return {
       title: 'Post Not Found',

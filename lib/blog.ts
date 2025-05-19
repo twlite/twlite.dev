@@ -8,9 +8,10 @@ export interface Post {
   slug: string;
   title: string;
   date: string;
-  excerpt: string;
+  description: string;
   content: string;
   readingTime: string;
+  tags: string[];
 }
 
 const postsDirectory = path.join(process.cwd(), 'content/blog');
@@ -37,8 +38,9 @@ export const getAllPosts = cache(async (): Promise<Post[]> => {
             slug,
             title: data.title,
             date: data.date,
-            excerpt: data.excerpt || '',
+            description: data.description || '',
             content,
+            tags: data.tags || [],
             readingTime: Math.ceil(stats.minutes).toString(),
           };
         })
@@ -66,7 +68,8 @@ export const getPostBySlug = cache(async (slug: string): Promise<Post> => {
       slug,
       title: data.title,
       date: data.date,
-      excerpt: data.excerpt || '',
+      tags: data.tags || [],
+      description: data.description || '',
       content,
       readingTime: Math.ceil(stats.minutes).toString(),
     };
