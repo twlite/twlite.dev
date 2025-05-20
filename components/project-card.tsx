@@ -11,15 +11,9 @@ import {
   CardFooter,
   CardHeader,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { Repository } from '@/lib/pinned-repos';
-import {
-  FaGithub,
-  FaExternalLinkAlt,
-  FaStar,
-  FaCodeBranch,
-} from 'react-icons/fa';
+import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
 import {
   SiTypescript,
   SiRust,
@@ -101,27 +95,12 @@ export default function ProjectCard({ repository }: ProjectCardProps) {
                 {getLanguageIcon(repository.language)}
                 <h3 className="font-semibold text-lg">{repository.name}</h3>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="flex items-center">
-                  <FaStar className="h-3.5 w-3.5 mr-1 text-yellow-400" />
-                  {repository.stargazers_count}+
-                </div>
-                <div className="flex items-center">
-                  <FaCodeBranch className="h-3.5 w-3.5 mr-1 text-gray-400" />
-                  {repository.forks_count}+
-                </div>
-              </div>
             </div>
           </CardHeader>
           <CardContent className="flex-grow">
             <p className="text-muted-foreground text-sm mb-4">
               {repository.description || 'No description provided'}
             </p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              <Badge variant="secondary" className="flex items-center gap-1">
-                {repository.language}
-              </Badge>
-            </div>
           </CardContent>
           <CardFooter className="pt-2">
             <div className="flex gap-2 w-full">

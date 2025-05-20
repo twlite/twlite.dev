@@ -5,8 +5,6 @@ export interface Repository {
   html_url: string;
   website_url: string;
   description: string;
-  stargazers_count: number;
-  forks_count: number;
   language: string;
   owner: {
     login: string;
@@ -23,8 +21,6 @@ export const pinnedRepositories: Repository[] = [
     html_url: 'https://github.com/Androz2091/discord-player',
     description:
       'Complete framework to simplify the implementation of music commands using discord.js v14',
-    stargazers_count: 616,
-    forks_count: 193,
     language: 'TypeScript',
     owner: {
       login: 'Androz2091',
@@ -38,8 +34,6 @@ export const pinnedRepositories: Repository[] = [
     full_name: 'underctrl-io/commandkit',
     html_url: 'https://github.com/underctrl-io/commandkit',
     description: 'The discord.js metaframework',
-    stargazers_count: 108,
-    forks_count: 11,
     language: 'TypeScript',
     owner: {
       login: 'underctrl-io',
@@ -54,8 +48,6 @@ export const pinnedRepositories: Repository[] = [
     html_url: 'https://github.com/neplextech/yasumu',
     description:
       'Yasumu is a customizable, offline-first, free and open-source application to test various types of APIs (Lightweight alternative to postman/insomnia/bruno).',
-    stargazers_count: 21,
-    forks_count: 3,
     language: 'TypeScript',
     owner: {
       login: 'neplextech',
@@ -69,8 +61,6 @@ export const pinnedRepositories: Repository[] = [
     full_name: 'neplextech/vectorizer',
     html_url: 'https://github.com/neplextech/vectorizer',
     description: 'Fast Node.js library to convert raster images to svg',
-    stargazers_count: 104,
-    forks_count: 5,
     language: 'Rust',
     owner: {
       login: 'neplextech',
@@ -84,8 +74,6 @@ export const pinnedRepositories: Repository[] = [
     full_name: 'webviewjs/webview',
     html_url: 'https://github.com/webviewjs/webview',
     description: 'Robust cross-platform webview library for Node/Deno/Bun',
-    stargazers_count: 28,
-    forks_count: 4,
     language: 'Rust',
     owner: {
       login: 'webviewjs',
@@ -99,8 +87,6 @@ export const pinnedRepositories: Repository[] = [
     full_name: 'androzdev/mediaplex',
     html_url: 'https://github.com/androzdev/mediaplex',
     description: 'Media utilities for node 🎵 🎧',
-    stargazers_count: 13,
-    forks_count: 1,
     language: 'Rust',
     owner: {
       login: 'androzdev',
