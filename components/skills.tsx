@@ -15,6 +15,7 @@ import {
   FaDocker,
   FaPython,
   FaAws,
+  FaRocket,
 } from 'react-icons/fa';
 import {
   SiTypescript,
@@ -32,6 +33,8 @@ import {
   SiSupabase,
   SiGithubactions,
   SiVercel,
+  SiJavascript,
+  SiJest,
 } from 'react-icons/si';
 import { BiLogoHtml5 } from 'react-icons/bi';
 import { TbApi } from 'react-icons/tb';
@@ -42,7 +45,7 @@ const skillCategories = [
     icon: <FaPalette className="h-6 w-6" />,
     skills: [
       { name: 'React', icon: <FaReact className="fill-teal-500" /> },
-      { name: 'Next.js', icon: <SiNextdotjs className="fill-white" /> },
+      { name: 'Next.js', icon: <SiNextdotjs className="fill-foreground" /> },
       {
         name: 'TypeScript',
         icon: <SiTypescript className="fill-blue-500" />,
@@ -59,7 +62,7 @@ const skillCategories = [
     icon: <FaServer className="h-6 w-6" />,
     skills: [
       { name: 'Node.js', icon: <FaNodeJs className="fill-green-600" /> },
-      { name: 'Express', icon: <SiExpress className="fill-white" /> },
+      { name: 'Express', icon: <SiExpress className="fill-foreground" /> },
       { name: 'NestJS', icon: <SiNestjs className="fill-red-500" /> },
       { name: 'REST APIs', icon: <TbApi className="stroke-blue-400" /> },
       { name: 'GraphQL', icon: <SiGraphql className="fill-pink-500" /> },
@@ -69,7 +72,10 @@ const skillCategories = [
     title: 'Languages',
     icon: <FaCode className="h-6 w-6" />,
     skills: [
-      { name: 'JavaScript', icon: <FaCode className="fill-yellow-400" /> },
+      {
+        name: 'JavaScript',
+        icon: <SiJavascript className="fill-yellow-400" />,
+      },
       { name: 'TypeScript', icon: <SiTypescript className="fill-blue-500" /> },
       { name: 'Python', icon: <FaPython className="fill-blue-400" /> },
       { name: 'Go', icon: <SiGo className="fill-cyan-500" /> },
@@ -92,10 +98,13 @@ const skillCategories = [
     icon: <FaLayerGroup className="h-6 w-6" />,
     skills: [
       { name: 'Docker', icon: <FaDocker className="fill-blue-400" /> },
-      { name: 'GitHub Actions', icon: <SiGithubactions className="fill-gray-100" /> },
+      {
+        name: 'GitHub Actions',
+        icon: <SiGithubactions className="fill-foreground" />,
+      },
       { name: 'CI/CD', icon: <FaCode className="fill-green-400" /> },
       { name: 'AWS', icon: <FaAws className="fill-orange-400" /> },
-      { name: 'Vercel', icon: <SiVercel className="fill-white" /> },
+      { name: 'Vercel', icon: <SiVercel className="fill-foreground" /> },
     ],
   },
   {
@@ -104,9 +113,12 @@ const skillCategories = [
     skills: [
       { name: 'Git', icon: <FaGitAlt className="fill-orange-500" /> },
       { name: 'Agile', icon: <FaCode className="fill-blue-400" /> },
-      { name: 'Testing', icon: <FaCode className="fill-green-400" /> },
+      { name: 'Testing', icon: <SiJest className="fill-red-500" /> },
       { name: 'UI/UX', icon: <FaPalette className="fill-purple-400" /> },
-      { name: 'Performance Optimization', icon: <FaCode className="fill-yellow-400" /> },
+      {
+        name: 'Performance Optimization',
+        icon: <FaRocket className="fill-yellow-400" />,
+      },
     ],
   },
 ];
@@ -133,7 +145,7 @@ export default function Skills() {
             >
               <Card className="h-full gradient-card">
                 <CardContent className="pt-6">
-                  <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center gap-3 mb-4 dark:text-foreground/90 text-foreground/70">
                     {category.icon}
                     <h3 className="font-semibold text-lg">{category.title}</h3>
                   </div>

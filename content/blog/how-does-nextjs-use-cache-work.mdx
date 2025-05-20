@@ -352,7 +352,6 @@ export function cacheTag(...tags) {
     throw new Error(
       'cacheTag called outside of a cached function context. Tags will not be applied.'
     );
-    return;
   }
   tags.forEach((tag) => store.tags.add(tag));
 }
@@ -364,13 +363,11 @@ export function cacheLife(ttlInMilliseconds) {
     throw new Error(
       'cacheLife called outside of a cached function context. TTL will not be applied.'
     );
-    return;
   }
   if (typeof ttlInMilliseconds !== 'number' || ttlInMilliseconds <= 0) {
     throw new RangeError(
       'Invalid TTL value for cacheLife. Must be a positive number.'
     );
-    return;
   }
   store.ttl = ttlInMilliseconds;
 }
@@ -480,10 +477,9 @@ export function cacheWrapper(fn) {
 export function cacheTag(...tags) {
   const store = cacheContext.getStore();
   if (!store) {
-    console.warn(
+    throw new Error(
       'cacheTag called outside of a cached function context. Tags will not be applied.'
     );
-    return;
   }
   tags.forEach((tag) => store.tags.add(tag));
 }
@@ -491,14 +487,14 @@ export function cacheTag(...tags) {
 export function cacheLife(ttlInMilliseconds) {
   const store = cacheContext.getStore();
   if (!store) {
-    console.warn(
+    throw new Error(
       'cacheLife called outside of a cached function context. TTL will not be applied.'
     );
-    return;
   }
   if (typeof ttlInMilliseconds !== 'number' || ttlInMilliseconds <= 0) {
-    console.warn('Invalid TTL value for cacheLife. Must be a positive number.');
-    return;
+    throw new RangeError(
+      'Invalid TTL value for cacheLife. Must be a positive number.'
+    );
   }
   store.ttl = ttlInMilliseconds;
 }

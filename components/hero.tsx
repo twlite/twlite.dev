@@ -49,12 +49,17 @@ export default function Hero() {
               accessibility, and user experience.
             </p>
             <div className="flex flex-wrap gap-4 pt-6 justify-center md:justify-start">
-              <Button asChild size="lg">
+              <Button asChild size="lg" className="w-full md:w-auto">
                 <Link href="#projects">
                   View Projects <FiArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button variant="outline" size="lg" asChild>
+              <Button
+                variant="outline"
+                className="w-full md:w-auto"
+                size="lg"
+                asChild
+              >
                 <Link href="#contact">Contact Me</Link>
               </Button>
             </div>
