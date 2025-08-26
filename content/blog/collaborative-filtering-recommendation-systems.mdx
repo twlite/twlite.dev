@@ -1,0 +1,559 @@
+---
+title: 'Building Recommendation Systems with Collaborative Filtering'
+date: '2025-08-26'
+description: 'Learn the basics of collaborative filtering and implement simple recommendation systems using TypeScript'
+---
+
+# Introduction
+
+Recommendation systems are everywhere - from Netflix suggesting your next movie to Amazon recommending products you might like. At the heart of many of these systems lies collaborative filtering, a technique that leverages the wisdom of crowds to make personalized recommendations.
+
+In this article, we'll explore the fundamentals of collaborative filtering, implement two main approaches, and discuss common challenges like the cold start problem. This is a practical guide that will give you the foundation to build your own recommendation systems.
+
+## What is Collaborative Filtering?
+
+Collaborative filtering works on a simple principle: users who have similar preferences in the past will have similar preferences in the future. Think of it this way: if Alice and Bob both liked "The Matrix" and "Inception," and Alice also liked "Interstellar," then Bob might like "Interstellar" too.
+
+## Types of Collaborative Filtering
+
+There are two main approaches:
+
+1. **User-based Collaborative Filtering**: Find users similar to the target user and recommend items they liked
+2. **Item-based Collaborative Filtering**: Find items similar to items the user has already liked and recommend those
+
+# User-Based Collaborative Filtering
+
+User-based collaborative filtering finds users similar to the target user and recommends items they liked. Here's a simple implementation:
+
+## Core Implementation
+
+```ts
+interface Rating {
+  userId: string;
+  itemId: string;
+  rating: number;
+}
+
+interface UserBasedRecommendation {
+  itemId: string;
+  predictedRating: number;
+  confidence: number;
+}
+
+class UserBasedCollaborativeFiltering {
+  private userRatings: Map<string, Map<string, number>> = new Map();
+  
+  constructor(ratings: Rating[]) {
+    this.buildUserIndex(ratings);
+  }
+  
+  private buildUserIndex(ratings: Rating[]): void {
+    for (const rating of ratings) {
+      if (!this.userRatings.has(rating.userId)) {
+        this.userRatings.set(rating.userId, new Map());
+      }
+      this.userRatings.get(rating.userId)!.set(rating.itemId, rating.rating);
+    }
+  }
+  
+  private findSimilarUsers(targetUserId: string, minSimilarity: number = 0.1): Array<{ userId: string; similarity: number }> {
+    const targetRatings = this.userRatings.get(targetUserId);
+    if (!targetRatings) return [];
+    
+    const similarities: Array<{ userId: string; similarity: number }> = [];
+    
+    for (const [userId, userRatings] of this.userRatings) {
+      if (userId === targetUserId) continue;
+      
+      const similarity = this.calculateSimilarity(targetRatings, userRatings);
+      if (similarity >= minSimilarity) {
+        similarities.push({ userId, similarity });
+      }
+    }
+    
+    return similarities.sort((a, b) => b.similarity - a.similarity);
+  }
+  
+  private calculateSimilarity(ratings1: Map<string, number>, ratings2: Map<string, number>): number {
+    const commonItems = new Set(
+      [...ratings1.keys()].filter(item => ratings2.has(item))
+    );
+    
+    if (commonItems.size < 2) return 0;
+    
+    const vector1: number[] = [];
+    const vector2: number[] = [];
+    
+    for (const item of commonItems) {
+      vector1.push(ratings1.get(item)!);
+      vector2.push(ratings2.get(item)!);
+    }
+    
+    return this.cosineSimilarity(vector1, vector2);
+  }
+  
+  private cosineSimilarity(vector1: number[], vector2: number[]): number {
+    let dotProduct = 0;
+    let norm1 = 0;
+    let norm2 = 0;
+    
+    for (let i = 0; i < vector1.length; i++) {
+      dotProduct += vector1[i] * vector2[i];
+      norm1 += vector1[i] * vector1[i];
+      norm2 += vector2[i] * vector2[i];
+    }
+    
+    if (norm1 === 0 || norm2 === 0) return 0;
+    return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+  }
+  
+  predictRating(userId: string, itemId: string): number | null {
+    const similarUsers = this.findSimilarUsers(userId);
+    if (similarUsers.length === 0) return null;
+    
+    let weightedSum = 0;
+    let similaritySum = 0;
+    
+    for (const { userId: similarUserId, similarity } of similarUsers) {
+      const rating = this.userRatings.get(similarUserId)?.get(itemId);
+      if (rating !== undefined) {
+        weightedSum += similarity * rating;
+        similaritySum += Math.abs(similarity);
+      }
+    }
+    
+    if (similaritySum === 0) return null;
+    return weightedSum / similaritySum;
+  }
+  
+  getRecommendations(userId: string, limit: number = 10): UserBasedRecommendation[] {
+    const userRatings = this.userRatings.get(userId);
+    if (!userRatings) return [];
+    
+    const ratedItems = new Set(userRatings.keys());
+    const recommendations: UserBasedRecommendation[] = [];
+    
+    // Get all items the user hasn't rated
+    for (const [itemId, itemRatings] of this.userRatings) {
+      if (ratedItems.has(itemId)) continue;
+      
+      const predictedRating = this.predictRating(userId, itemId);
+      if (predictedRating !== null && predictedRating >= 3.0) {
+        recommendations.push({
+          itemId,
+          predictedRating,
+          confidence: this.calculateConfidence(userId, itemId)
+        });
+      }
+    }
+    
+    return recommendations
+      .sort((a, b) => b.predictedRating - a.predictedRating)
+      .slice(0, limit);
+  }
+  
+  private calculateConfidence(userId: string, itemId: string): number {
+    const similarUsers = this.findSimilarUsers(userId);
+    const relevantUsers = similarUsers.filter(user => 
+      this.userRatings.get(user.userId)?.has(itemId)
+    );
+    
+    if (relevantUsers.length === 0) return 0;
+    
+    const avgSimilarity = relevantUsers.reduce((sum, user) => sum + user.similarity, 0) / relevantUsers.length;
+    return Math.min(avgSimilarity, 1.0);
+  }
+}
+```
+
+## Usage Example
+
+```ts
+// Sample data
+const ratings: Rating[] = [
+  { userId: 'alice', itemId: 'matrix', rating: 5 },
+  { userId: 'alice', itemId: 'inception', rating: 4 },
+  { userId: 'alice', itemId: 'interstellar', rating: 5 },
+  { userId: 'bob', itemId: 'matrix', rating: 4 },
+  { userId: 'bob', itemId: 'inception', rating: 5 },
+  { userId: 'bob', itemId: 'pulp-fiction', rating: 3 },
+  { userId: 'charlie', itemId: 'matrix', rating: 2 },
+  { userId: 'charlie', itemId: 'pulp-fiction', rating: 5 },
+];
+
+// Initialize the system
+const userBasedCF = new UserBasedCollaborativeFiltering(ratings);
+
+// Get recommendations for Alice
+const recommendations = userBasedCF.getRecommendations('alice', 5);
+console.log('Recommendations for Alice:', recommendations);
+
+// Predict rating for a specific item
+const predictedRating = userBasedCF.predictRating('alice', 'pulp-fiction');
+console.log('Predicted rating for Pulp Fiction:', predictedRating);
+```
+
+# Item-Based Collaborative Filtering
+
+Item-based collaborative filtering finds items similar to items the user has already liked. This approach is often more stable and scalable than user-based filtering.
+
+## Core Implementation
+
+```ts
+interface ItemBasedRecommendation {
+  itemId: string;
+  predictedRating: number;
+  confidence: number;
+}
+
+class ItemBasedCollaborativeFiltering {
+  private userRatings: Map<string, Map<string, number>> = new Map();
+  private itemRatings: Map<string, Map<string, number>> = new Map();
+  private itemSimilarities: Map<string, Map<string, number>> = new Map();
+  
+  constructor(ratings: Rating[]) {
+    this.buildIndexes(ratings);
+    this.precomputeItemSimilarities();
+  }
+  
+  private buildIndexes(ratings: Rating[]): void {
+    for (const rating of ratings) {
+      // User -> Item -> Rating
+      if (!this.userRatings.has(rating.userId)) {
+        this.userRatings.set(rating.userId, new Map());
+      }
+      this.userRatings.get(rating.userId)!.set(rating.itemId, rating.rating);
+      
+      // Item -> User -> Rating
+      if (!this.itemRatings.has(rating.itemId)) {
+        this.itemRatings.set(rating.itemId, new Map());
+      }
+      this.itemRatings.get(rating.itemId)!.set(rating.userId, rating.rating);
+    }
+  }
+  
+  private precomputeItemSimilarities(): void {
+    const itemIds = Array.from(this.itemRatings.keys());
+    
+    for (let i = 0; i < itemIds.length; i++) {
+      for (let j = i + 1; j < itemIds.length; j++) {
+        const item1 = itemIds[i];
+        const item2 = itemIds[j];
+        
+        const similarity = this.calculateItemSimilarity(item1, item2);
+        
+        if (similarity > 0.1) { // Only store meaningful similarities
+          if (!this.itemSimilarities.has(item1)) {
+            this.itemSimilarities.set(item1, new Map());
+          }
+          if (!this.itemSimilarities.has(item2)) {
+            this.itemSimilarities.set(item2, new Map());
+          }
+          
+          this.itemSimilarities.get(item1)!.set(item2, similarity);
+          this.itemSimilarities.get(item2)!.set(item1, similarity);
+        }
+      }
+    }
+  }
+  
+  private calculateItemSimilarity(item1: string, item2: string): number {
+    const ratings1 = this.itemRatings.get(item1);
+    const ratings2 = this.itemRatings.get(item2);
+    
+    if (!ratings1 || !ratings2) return 0;
+    
+    const commonUsers = new Set(
+      [...ratings1.keys()].filter(user => ratings2.has(user))
+    );
+    
+    if (commonUsers.size < 2) return 0;
+    
+    const vector1: number[] = [];
+    const vector2: number[] = [];
+    
+    for (const user of commonUsers) {
+      vector1.push(ratings1.get(user)!);
+      vector2.push(ratings2.get(user)!);
+    }
+    
+    return this.cosineSimilarity(vector1, vector2);
+  }
+  
+  private cosineSimilarity(vector1: number[], vector2: number[]): number {
+    let dotProduct = 0;
+    let norm1 = 0;
+    let norm2 = 0;
+    
+    for (let i = 0; i < vector1.length; i++) {
+      dotProduct += vector1[i] * vector2[i];
+      norm1 += vector1[i] * vector1[i];
+      norm2 += vector2[i] * vector2[i];
+    }
+    
+    if (norm1 === 0 || norm2 === 0) return 0;
+    return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+  }
+  
+  predictRating(userId: string, itemId: string): number | null {
+    const userRatings = this.userRatings.get(userId);
+    if (!userRatings) return null;
+    
+    const itemSimilarities = this.itemSimilarities.get(itemId);
+    if (!itemSimilarities) return null;
+    
+    let weightedSum = 0;
+    let similaritySum = 0;
+    
+    for (const [ratedItemId, rating] of userRatings) {
+      const similarity = itemSimilarities.get(ratedItemId);
+      if (similarity !== undefined) {
+        weightedSum += similarity * rating;
+        similaritySum += Math.abs(similarity);
+      }
+    }
+    
+    if (similaritySum === 0) return null;
+    return weightedSum / similaritySum;
+  }
+  
+  getRecommendations(userId: string, limit: number = 10): ItemBasedRecommendation[] {
+    const userRatings = this.userRatings.get(userId);
+    if (!userRatings) return [];
+    
+    const ratedItems = new Set(userRatings.keys());
+    const recommendations: ItemBasedRecommendation[] = [];
+    
+    for (const [itemId, itemRatings] of this.itemRatings) {
+      if (ratedItems.has(itemId)) continue;
+      
+      const predictedRating = this.predictRating(userId, itemId);
+      if (predictedRating !== null && predictedRating >= 3.0) {
+        recommendations.push({
+          itemId,
+          predictedRating,
+          confidence: this.calculateConfidence(userId, itemId)
+        });
+      }
+    }
+    
+    return recommendations
+      .sort((a, b) => b.predictedRating - a.predictedRating)
+      .slice(0, limit);
+  }
+  
+  private calculateConfidence(userId: string, itemId: string): number {
+    const userRatings = this.userRatings.get(userId);
+    if (!userRatings) return 0;
+    
+    const itemSimilarities = this.itemSimilarities.get(itemId);
+    if (!itemSimilarities) return 0;
+    
+    let totalSimilarity = 0;
+    let count = 0;
+    
+    for (const [ratedItemId] of userRatings) {
+      const similarity = itemSimilarities.get(ratedItemId);
+      if (similarity !== undefined) {
+        totalSimilarity += similarity;
+        count++;
+      }
+    }
+    
+    return count > 0 ? totalSimilarity / count : 0;
+  }
+  
+  getSimilarItems(itemId: string, limit: number = 5): Array<{ itemId: string; similarity: number }> {
+    const similarities = this.itemSimilarities.get(itemId);
+    if (!similarities) return [];
+    
+    return Array.from(similarities.entries())
+      .map(([similarItemId, similarity]) => ({ itemId: similarItemId, similarity }))
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, limit);
+  }
+}
+```
+
+## Usage Example
+
+```ts
+const itemBasedCF = new ItemBasedCollaborativeFiltering(ratings);
+
+// Get recommendations for Alice
+const recommendations = itemBasedCF.getRecommendations('alice', 5);
+console.log('Item-based recommendations for Alice:', recommendations);
+
+// Find similar items
+const similarItems = itemBasedCF.getSimilarItems('matrix', 3);
+console.log('Items similar to Matrix:', similarItems);
+```
+
+# The Cold Start Problem
+
+One of the biggest challenges in recommendation systems is the **cold start problem** - when new users or items have insufficient data to make accurate recommendations.
+
+## Types of Cold Start
+
+### 1. New User Cold Start
+When a new user joins the system, they have no rating history, making it impossible to find similar users or make personalized recommendations.
+
+**Solutions:**
+- **Content-based filtering**: Recommend items based on user profile information (age, location, preferences)
+- **Popular items**: Start with trending or most-rated items
+- **Onboarding questions**: Ask users to rate a few items to bootstrap their profile
+- **Hybrid approaches**: Combine collaborative filtering with content-based methods
+
+### 2. New Item Cold Start
+When new items are added to the system, they have no ratings, so they can't be recommended through collaborative filtering.
+
+**Solutions:**
+- **Content-based filtering**: Use item features (genre, author, tags) to find similar items
+- **Promotion**: Feature new items prominently to encourage ratings
+- **A/B testing**: Show new items to different user segments to gather initial ratings
+
+## Implementation Example
+
+```ts
+class ColdStartHandler {
+  private popularItems: string[] = [];
+  private itemFeatures: Map<string, string[]> = new Map();
+  
+  constructor(ratings: Rating[]) {
+    this.calculatePopularItems(ratings);
+  }
+  
+  private calculatePopularItems(ratings: Rating[]): void {
+    const itemCounts = new Map<string, number>();
+    
+    for (const rating of ratings) {
+      itemCounts.set(rating.itemId, (itemCounts.get(rating.itemId) || 0) + 1);
+    }
+    
+    this.popularItems = Array.from(itemCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([itemId]) => itemId)
+      .slice(0, 20);
+  }
+  
+  getColdStartRecommendations(userId: string, limit: number = 10): string[] {
+    // For new users, return popular items
+    return this.popularItems.slice(0, limit);
+  }
+  
+  setItemFeatures(itemId: string, features: string[]): void {
+    this.itemFeatures.set(itemId, features);
+  }
+  
+  getSimilarItemsByFeatures(itemId: string, limit: number = 5): string[] {
+    const targetFeatures = this.itemFeatures.get(itemId);
+    if (!targetFeatures) return [];
+    
+    const similarities: Array<{ itemId: string; similarity: number }> = [];
+    
+    for (const [otherItemId, otherFeatures] of this.itemFeatures) {
+      if (otherItemId === itemId) continue;
+      
+      const similarity = this.calculateFeatureSimilarity(targetFeatures, otherFeatures);
+      similarities.push({ itemId: otherItemId, similarity });
+    }
+    
+    return similarities
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, limit)
+      .map(item => item.itemId);
+  }
+  
+  private calculateFeatureSimilarity(features1: string[], features2: string[]): number {
+    const set1 = new Set(features1);
+    const set2 = new Set(features2);
+    
+    const intersection = new Set([...set1].filter(f => set2.has(f)));
+    const union = new Set([...set1, ...set2]);
+    
+    return intersection.size / union.size;
+  }
+}
+```
+
+# When to Use Each Approach
+
+## User-Based vs Item-Based
+
+**Use User-Based When:**
+- You have a small to medium number of users
+- User preferences change frequently
+- You want intuitive, explainable recommendations
+- You have rich user profiles
+
+**Use Item-Based When:**
+- You have a large number of users
+- Item characteristics are relatively stable
+- You need fast, scalable recommendations
+- You want to avoid the user cold start problem
+
+## Performance Considerations
+
+The implementations above are basic versions suitable for learning and small applications. Real-world applications will require:
+
+- **Caching**: Store computed similarities and recommendations
+- **Batch processing**: Precompute similarities offline
+- **Database optimization**: Proper indexing for large datasets
+- **Real-time updates**: Incremental updates as new ratings come in
+- **Scalability**: Handle millions of users and items
+
+# Evaluation Metrics
+
+To measure how well your recommendation system is performing:
+
+```ts
+class RecommendationEvaluator {
+  static meanAbsoluteError(predictions: number[], actuals: number[]): number {
+    if (predictions.length !== actuals.length) return 0;
+    
+    const errors = predictions.map((pred, i) => Math.abs(pred - actuals[i]));
+    return errors.reduce((sum, error) => sum + error, 0) / errors.length;
+  }
+  
+  static precisionAtK(recommendedItems: string[], relevantItems: Set<string>, k: number): number {
+    const topK = recommendedItems.slice(0, k);
+    const relevantInTopK = topK.filter(item => relevantItems.has(item));
+    
+    return relevantInTopK.length / k;
+  }
+  
+  static recallAtK(recommendedItems: string[], relevantItems: Set<string>, k: number): number {
+    const topK = recommendedItems.slice(0, k);
+    const relevantInTopK = topK.filter(item => relevantItems.has(item));
+    
+    return relevantInTopK.length / relevantItems.size;
+  }
+}
+```
+
+# Conclusion
+
+Collaborative filtering provides a solid foundation for building recommendation systems. The key takeaways are:
+
+## What We Covered
+- **User-based filtering**: Find similar users and recommend items they liked
+- **Item-based filtering**: Find similar items and recommend those
+- **Cold start problem**: Handle new users and items with insufficient data
+- **Basic implementations**: Working TypeScript code you can extend
+
+## Next Steps
+- Start with simple implementations and iterate
+- Add caching and optimization as you scale
+- Consider hybrid approaches for better results
+- Always measure performance with appropriate metrics
+- Handle edge cases like sparse data and outliers
+
+## Real-World Considerations
+The examples in this article are simplified for learning purposes. Production systems will need:
+- Database integration and optimization
+- Caching and performance tuning
+- Error handling and fallbacks
+- A/B testing and experimentation
+- Monitoring and alerting
+
+Remember that recommendation systems are iterative - start simple, measure performance, and gradually add complexity based on your needs and constraints.
