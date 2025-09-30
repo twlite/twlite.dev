@@ -24,6 +24,31 @@ const nextConfig = {
         destination: 'https://discord.gg/8UWUzM6JSY',
         permanent: true,
       },
+      {
+        source: '/github',
+        destination: 'https://github.com/twlite',
+        permanent: true,
+      },
+      {
+        source: '/twitter',
+        destination: 'https://twitter.com/hellotwlite',
+        permanent: true,
+      },
+      {
+        source: '/patreon',
+        destination: 'https://patreon.com/twlite',
+        permanent: true,
+      },
+      {
+        source: '/linkedin',
+        destination: 'https://www.linkedin.com/in/twlite',
+        permanent: true,
+      },
+      {
+        source: '/tiktok',
+        destination: 'https://www.tiktok.com/@twilightdev',
+        permanent: true,
+      },
     ];
   },
 } satisfies NextConfig;
