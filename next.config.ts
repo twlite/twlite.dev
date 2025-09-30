@@ -17,6 +17,15 @@ const nextConfig = {
   experimental: {
     mdxRs: false,
   },
+  redirects: async () => {
+    return [
+      {
+        source: '/discord',
+        destination: 'https://discord.gg/8UWUzM6JSY',
+        permanent: true,
+      },
+    ];
+  },
 } satisfies NextConfig;
 
 const withMDX = createMDX({
