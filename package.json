@@ -57,7 +57,7 @@
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
     "mdx": "latest",
-    "next": "15.2.4",
+    "next": "15.2.8",
     "next-mdx-remote": "latest",
     "next-mdx-remote-client": "^2.1.2",
     "next-themes": "latest",
