@@ -3,10 +3,10 @@ import {
   Discord,
   Email,
   GitHub,
-  // Instagram,
+  Instagram,
   LinkedIn,
   Patreon,
-  // TikTok,
+  TikTok,
 } from "../icons";
 
 const socialLinks = [
@@ -21,16 +21,16 @@ const socialLinks = [
     url: "https://discord.com/users/916316955772862475",
     name: "Discord",
   },
-  // {
-  //   icon: <Instagram />,
-  //   url: "https://www.instagram.com/twilight.dev",
-  //   name: "Instagram",
-  // },
-  // {
-  //   icon: <TikTok />,
-  //   url: "https://www.tiktok.com/@twilightdev",
-  //   name: "TikTok",
-  // },
+  {
+    icon: <Instagram />,
+    url: "https://www.instagram.com/twilight.dev",
+    name: "Instagram",
+  },
+  {
+    icon: <TikTok />,
+    url: "https://www.tiktok.com/@twilightdev",
+    name: "TikTok",
+  },
   {
     icon: <Patreon />,
     url: "https://www.patreon.com/twlite",

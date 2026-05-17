@@ -9,6 +9,19 @@ export default function GalleryGrid({
   photographs: Photograph[];
 }) {
   const [selected, setSelected] = useState<Photograph | null>(null);
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+  const markImageLoaded = (src: string) => {
+    setLoadedImages((current) => {
+      if (current[src]) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [src]: true,
+      };
+    });
+  };
 
   useEffect(() => {
     if (!selected) {
@@ -65,14 +78,29 @@ export default function GalleryGrid({
             key={photograph.src}
             type="button"
             onClick={() => setSelected(photograph)}
-            className="mb-3 block w-full overflow-hidden rounded-sm border border-neutral-800 bg-neutral-900 text-left transition hover:border-neutral-600"
+            className="relative mb-3 block w-full overflow-hidden rounded-sm border border-neutral-800 bg-neutral-900 text-left transition hover:border-neutral-600"
+            style={{ aspectRatio: `${photograph.width} / ${photograph.height}` }}
           >
+            {!loadedImages[photograph.src] && (
+              <span className="gallery-image-skeleton" aria-hidden="true" />
+            )}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={photograph.src}
               alt={photograph.title}
-              className="h-auto w-full"
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
+                loadedImages[photograph.src] ? "opacity-100" : "opacity-0"
+              }`}
               loading="lazy"
+              width={photograph.width}
+              height={photograph.height}
+              ref={(image) => {
+                if (image?.complete && image.naturalWidth > 0) {
+                  markImageLoaded(photograph.src);
+                }
+              }}
+              onLoad={() => markImageLoaded(photograph.src)}
+              onError={() => markImageLoaded(photograph.src)}
             />
           </button>
         ))}

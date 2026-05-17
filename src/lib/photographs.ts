@@ -5,6 +5,8 @@ export interface Photograph {
   title: string;
   src: string;
   fileName: string;
+  width: number;
+  height: number;
   size: number;
   updatedAt: string;
 }

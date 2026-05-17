@@ -17,9 +17,9 @@ export async function GET(
     return new Response("Not found", { status: 404 });
   }
 
-  return new Response(post.content, {
+  return new Response(JSON.stringify(post), {
     headers: {
-      "Content-Type": "text/markdown; charset=utf-8",
+      "Content-Type": "application/json; charset=utf-8",
       "Cache-Control": "public, max-age=0, must-revalidate",
     },
   });
