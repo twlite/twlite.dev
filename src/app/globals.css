@@ -1,0 +1,254 @@
+@import "tailwindcss";
+
+:root {
+    --background: #ffffff;
+    --foreground: #171717;
+}
+
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --font-sans: var(--font-geist-sans);
+    --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #0a0a0a;
+        --foreground: #ededed;
+    }
+}
+
+body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.blog-content {
+    @apply text-neutral-300;
+
+    > * + * {
+        @apply mt-5;
+    }
+
+    :where(h1, h2, h3, h4, h5, h6) {
+        @apply scroll-mt-24 text-balance font-semibold tracking-normal text-neutral-50;
+    }
+
+    h1 {
+        @apply mt-8 mb-3 text-base leading-tight md:text-lg;
+    }
+
+    h2 {
+        @apply mt-8 border-t border-neutral-800 pt-6 text-[0.95rem] leading-tight md:text-base;
+    }
+
+    h3 {
+        @apply mt-6 text-sm leading-snug md:text-[0.95rem];
+    }
+
+    h4 {
+        @apply mt-5 text-[0.8125rem] leading-snug md:text-sm;
+    }
+
+    h5,
+    h6 {
+        @apply mt-6 text-xs uppercase tracking-wide text-neutral-300;
+    }
+
+    h3 code {
+        @apply !text-xs md:!text-sm;
+    }
+
+    p {
+        @apply text-sm leading-7 text-neutral-300;
+    }
+
+    p:first-child {
+        @apply text-neutral-200;
+    }
+
+    a {
+        @apply font-medium text-neutral-50 underline decoration-neutral-600 underline-offset-4 transition-colors hover:text-white hover:decoration-neutral-200;
+    }
+
+    strong {
+        @apply font-semibold text-neutral-100;
+    }
+
+    em {
+        @apply text-neutral-200;
+    }
+
+    :where(ul, ol) {
+        @apply my-5 space-y-1.5 pl-5 text-sm leading-7 text-neutral-300;
+    }
+
+    ul {
+        @apply list-disc;
+    }
+
+    ol {
+        @apply list-decimal;
+    }
+
+    li {
+        @apply pl-1;
+    }
+
+    li::marker {
+        @apply text-neutral-500;
+    }
+
+    li > :where(ul, ol) {
+        @apply my-2;
+    }
+
+    blockquote {
+        @apply my-7 border-l-2 border-neutral-600 bg-neutral-900/50 px-5 py-4 text-neutral-300;
+    }
+
+    blockquote p {
+        @apply my-0 text-sm leading-7 text-neutral-300;
+    }
+
+    hr {
+        @apply my-10 border-0 border-t border-neutral-800;
+    }
+
+    img {
+        @apply my-8 rounded-md border border-neutral-800 bg-neutral-900;
+    }
+
+    table {
+        @apply my-0 w-full min-w-full border-collapse text-xs;
+    }
+
+    thead {
+        @apply bg-neutral-900;
+    }
+
+    th {
+        @apply border border-neutral-800 px-3 py-2 text-left font-semibold text-neutral-100;
+    }
+
+    td {
+        @apply border border-neutral-800 px-3 py-2 text-neutral-300;
+    }
+
+    tbody tr:nth-child(even) {
+        @apply bg-neutral-900/35;
+    }
+
+    :not(pre) > code {
+        @apply rounded border border-neutral-800 bg-neutral-900 px-1.5 py-0.5 text-[0.9em] leading-normal text-neutral-100;
+    }
+
+    pre {
+        @apply !px-0 rounded-md border border-neutral-800 bg-neutral-950/90 shadow-sm;
+    }
+
+    .code-block {
+        @apply relative;
+    }
+
+    .code-block-copy {
+        @apply absolute right-2 top-2 z-10 rounded border border-neutral-700 bg-neutral-900/90 px-2 py-1 text-[0.6875rem] font-medium text-neutral-300 opacity-0 shadow-sm transition hover:border-neutral-500 hover:text-neutral-50 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500;
+    }
+
+    .code-block:hover .code-block-copy {
+        @apply opacity-100;
+    }
+
+    code {
+        @apply text-xs !leading-6 md:text-[0.8125rem];
+    }
+
+    pre > code {
+        counter-reset: line;
+        scrollbar-width: thin;
+    }
+
+    code[data-theme*=" "],
+    code[data-theme*=" "] span {
+        color: var(--shiki-dark);
+        background-color: var(--shiki-light-bg);
+    }
+
+    code[data-line-numbers] {
+        counter-reset: line;
+    }
+
+    code[data-line-numbers] > [data-line]::before {
+        counter-increment: line;
+        content: counter(line);
+        @apply mr-4 inline-block w-4 select-none text-right text-neutral-500;
+    }
+
+    .prose {
+        @apply max-w-[55rem] sm:text-lg md:text-xl !leading-7 sm:!leading-9;
+    }
+
+    pre [data-line] {
+        @apply border-l-2 border-l-transparent px-4;
+    }
+
+    [data-highlighted-line] {
+        background: rgba(245, 245, 245, 0.08);
+        @apply border-l-neutral-300;
+    }
+
+    [data-highlighted-chars] {
+        @apply rounded bg-zinc-600/50;
+        box-shadow: 0 0 0 4px rgb(82 82 91 / 0.5);
+    }
+
+    [data-chars-id] {
+        @apply shadow-none p-1 border-b-2;
+    }
+
+    [data-chars-id] span {
+        @apply !text-inherit;
+    }
+
+    [data-chars-id="v"] {
+        @apply !text-pink-300 bg-rose-800/50 border-b-pink-600 font-bold;
+    }
+
+    [data-chars-id="s"] {
+        @apply !text-yellow-300 bg-yellow-800/50 border-b-yellow-600 font-bold;
+    }
+
+    [data-chars-id="i"] {
+        @apply !text-purple-200 bg-purple-800/50 border-b-purple-600 font-bold;
+    }
+
+    [data-rehype-pretty-code-title] {
+        @apply rounded-t-md border border-b-0 border-neutral-800 bg-neutral-900 px-3 py-2 text-sm font-semibold text-neutral-200;
+    }
+
+    figure[data-rehype-pretty-code-figure]:has(
+            > [data-rehype-pretty-code-title]
+        )
+        .code-block-copy {
+        @apply top-10;
+    }
+
+    figure[data-rehype-pretty-code-figure]:has(
+            > [data-rehype-pretty-code-title]
+        )
+        pre {
+        @apply !rounded-t-none;
+    }
+
+    figure {
+        @apply my-7;
+    }
+
+    pre,
+    code,
+    figure {
+        @apply overflow-x-auto;
+    }
+}

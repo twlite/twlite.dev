@@ -1,0 +1,764 @@
+---
+title: 'Understanding and Implementing Next.js "use cache" Directive: A Deep Dive'
+date: '2025-05-19'
+description: 'A comprehensive guide to understanding how the "use cache" directive in Next.js works, with a step-by-step implementation from scratch.'
+tags:
+  - 'nextjs'
+  - 'react server components'
+  - 'caching'
+  - 'web development'
+  - 'performance'
+  - 'tutorial'
+---
+
+Have you ever wondered how Next.js, particularly with React Server Components, magically caches your data using the [`use cache`](https://www.google.com/search?q=%5Bhttps://nextjs.org/docs/app/api-reference/directives/use-cache%5D\(https://nextjs.org/docs/app/api-reference/directives/use-cache\)) directive? This powerful feature can significantly boost your application's performance by avoiding redundant computations and data fetching. In this guide, we'll dissect this concept, explore its underlying mechanisms, and then implement a simplified version from scratch to solidify your understanding.
+
+**Who is this guide for?**
+
+While we touch on beginner concepts, this guide dives deep into implementation details. It's best suited for developers with some Next.js and JavaScript experience who want to understand the "magic" behind `use cache`.
+
+
+## What is the "use cache" directive?
+
+The `use cache` directive is a signal within React Server Components that tells Next.js to **memoize** (cache) the result of an async function. Once a function marked with `use cache` is executed with a specific set of arguments, its return value is stored. Subsequent calls to the same function with the same arguments during the same rendering pass will return the cached result instead of re-executing the function.
+
+This is particularly beneficial for:
+
+  - **Expensive computations**: Operations that consume significant CPU time.
+  - **Data fetching**: Preventing multiple identical API calls within a single request-response lifecycle.
+  - **Improving application performance**: Reducing latency and server load.
+  - **Ensuring data consistency**: Multiple components accessing the same data within a render will get the exact same object.
+
+Here's a canonical example:
+
+```javascript
+// app/utils/data.js
+export async function getPokemonDetails(pokemonName) {
+  'use cache'; // Instructs Next.js to cache the result of this function
+
+  console.log(`Fetching details for ${pokemonName} from API...`);
+  // This API call will only happen once per pokemonName per request,
+  // even if getPokemonDetails(pokemonName) is called multiple times.
+  const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ${pokemonName}`);
+  }
+  return res.json();
+}
+```
+
+If multiple components in your React tree call `getPokemonDetails('pikachu')` during a single server render, the actual fetch will only occur once.
+
+
+## Core Caching Concepts in Next.js
+
+While `'use cache'` provides basic memoization, Next.js (and the React caching APIs it builds upon) offers more advanced caching capabilities, often used in conjunction with `fetch` or custom caching solutions:
+
+1.  **Basic Memoization with `'use cache'`**: As discussed, this memoizes function results within a single server rendering lifecycle.
+2.  **Request Memoization**: Next.js automatically memoizes `fetch` requests with the same URL and options. This is a powerful, automatic feature of the App Router.
+3.  **Data Cache**: Next.js can persist `fetch` requests across multiple requests and deployments, based on configuration. This is a more durable cache.
+4.  **Tagged Revalidation**: This is the key to invalidating specific cache entries. You can associate cache entries with **tags** (e.g., using `next: { tags: ['myTag'] }` in a `fetch` call) and then **revalidate** those entries on-demand by calling the `revalidateTag` function. This is a more granular and efficient way to control the cache than clearing the entire cache. The `revalidatePath` function is similar but operates on a specific page or path.
+
+Our implementation will focus on mimicking the memoization behavior of `use cache` and adding advanced features like tagging and time-to-live (TTL) for a custom cache solution, while correctly using the term `revalidateTag`.
+
+
+## How does `'use cache'` work conceptually?
+
+Behind the scenes, the `'use cache'` directive isn't native JavaScript syntax. It's a convention that Next.js's build system processes. This directive often signals the use of a higher-order function (HoF) that wraps your original function, imbuing it with caching capabilities.
+
+We can simulate this transformation using a package like [directive-to-hof](https://npm.im/directive-to-hof).
+
+First, install the package:
+
+```bash
+npm install directive-to-hof
+# or
+yarn add directive-to-hof
+# or
+pnpm add directive-to-hof
+```
+
+Then, you'd create a transformer. This build-time script would find functions with `'use cache'` and wrap them:
+
+```javascript
+// build-transformer.js
+import { createDirectiveTransformer } from 'directive-to-hof';
+
+// This transformer will convert our 'use cache' directive into actual caching code
+const transformer = createDirectiveTransformer({
+  directive: 'use cache', // The directive string we're looking for
+  importPath: './cache.js', // Path to our custom caching implementation
+  importName: 'cacheWrapper', // The HOF that will provide caching
+  asyncOnly: true, // Ensure it only applies to async functions
+});
+
+// In a real build step, you'd apply this transformer to your source files.
+// For example:
+// const originalCode = "async function getData() { 'use cache'; ... }";
+// const { contents } = await transformer(originalCode, { path: './app/utils/data.js' });
+// console.log(contents);
+```
+
+When you write code like this in `your-file.js`:
+
+```javascript
+export async function getPokemon() {
+  'use cache';
+  const res = await fetch('https://pokeapi.co/api/v2/pokemon');
+  return res.json();
+}
+```
+
+The transformer would output something like this (conceptually):
+
+```javascript
+import { cacheWrapper } from './cache.js'; // Our custom caching logic
+
+const getPokemonOriginal = async () => {
+  const res = await fetch('https://pokeapi.co/api/v2/pokemon');
+  return res.json();
+};
+export const getPokemon = cacheWrapper(getPokemonOriginal);
+```
+
+
+## Understanding `AsyncLocalStorage`
+
+Before diving into our cache implementation, we must grasp `AsyncLocalStorage`. This Node.js API (`node:async_hooks`) is crucial for maintaining context across asynchronous operations, especially in server environments like Next.js.
+
+Think of `AsyncLocalStorage` as a way to carry data implicitly through a sequence of asynchronous calls without explicitly passing it down as arguments. It's like having a request-specific "bag" of data.
+
+1.  You `run` a function within a new context, initializing its store.
+2.  Any function (synchronous or asynchronous) called directly or indirectly within that `run` callback can access this store.
+3.  The store is isolated to that specific asynchronous execution flow.
+
+Here's a simplified example:
+
+```javascript
+import { AsyncLocalStorage } from 'node:async_hooks';
+
+const storage = new AsyncLocalStorage();
+
+async function logWithValue(message) {
+  const store = storage.getStore(); // Retrieve data from the current context
+  console.log(`${store.requestId}: ${message} - Value: ${store.value}`);
+}
+
+async function firstAsyncOperation() {
+  await logWithValue('Inside firstAsyncOperation');
+  // Simulate more async work
+  await new Promise((resolve) => setTimeout(resolve, 50));
+}
+
+async function secondAsyncOperation() {
+  await logWithValue('Inside secondAsyncOperation');
+}
+
+async function mainOperation(requestId) {
+  // Start a new context with initial data for this specific operation
+  await storage.run({ requestId, value: Math.random() * 100 }, async () => {
+    await firstAsyncOperation();
+    await secondAsyncOperation();
+    await logWithValue('Finished mainOperation');
+  });
+}
+
+// Simulate two concurrent operations
+mainOperation('Request-A');
+mainOperation('Request-B');
+
+// Example Output (order might vary for Request-A/B blocks, but internal order is maintained):
+// Request-A: Inside firstAsyncOperation - Value: <random_value_A>
+// Request-B: Inside firstAsyncOperation - Value: <random_value_B>
+// Request-A: Inside secondAsyncOperation - Value: <random_value_A>
+// Request-B: Inside secondAsyncOperation - Value: <random_value_B>
+// Request-A: Finished mainOperation - Value: <random_value_A>
+// Request-B: Finished mainOperation - Value: <random_value_B>
+```
+
+We'll use `AsyncLocalStorage` to track cache metadata (like tags and expiration times) associated with a specific call chain of our cached functions.
+
+
+## Implementing the Custom Cache System
+
+Let's build our caching system step by step. Our system will reside in `cache.js`.
+
+### Step 1: Creating a Cache Storage with Expiration (`MapWithTTL`)
+
+We need a storage mechanism that can automatically expire entries. A JavaScript `Map` is a good start, but we'll extend it to handle Time-To-Live (TTL).
+
+```javascript
+// cache.js (Partial 1)
+class MapWithTTL extends Map {
+  set(key, valueWithOptions) {
+    // Expect valueWithOptions to be { data: any, ttl?: number }
+    const { data, ttl = Infinity } = valueWithOptions; // Default TTL is forever
+
+    let expirationTime = Infinity;
+    if (ttl !== Infinity && typeof ttl === 'number' && ttl > 0) {
+      expirationTime = Date.now() + ttl;
+    }
+
+    // Store the actual data along with its expiration timestamp
+    super.set(key, { data, expirationTime });
+    return this;
+  }
+
+  get(key) {
+    const entry = super.get(key);
+
+    if (entry) {
+      // Check if the entry has expired
+      if (entry.expirationTime <= Date.now()) {
+        this.delete(key); // Expired, remove it
+        return undefined;
+      }
+      return entry.data; // Still valid, return the data
+    }
+    return undefined; // Not found
+  }
+
+  has(key) {
+    // `get` handles expiration logic, so we can reuse it
+    return this.get(key) !== undefined;
+  }
+}
+```
+
+**Example Usage of `MapWithTTL`:**
+
+```javascript
+const myCache = new MapWithTTL();
+// Cache 'userData' for 5 seconds (5000 ms)
+myCache.set('userData', { data: { name: 'Alice' }, ttl: 5000 });
+// Cache 'config' indefinitely
+myCache.set('config', { data: { theme: 'dark' } });
+
+console.log(myCache.get('userData')); // { name: 'Alice' }
+setTimeout(() => {
+  console.log(myCache.get('userData')); // undefined (if 5 seconds have passed)
+  console.log(myCache.has('userData')); // false
+  console.log(myCache.get('config')); // { theme: 'dark' } (still there)
+}, 6000);
+```
+
+### Step 2: Setting Up the Cache Context and Storage Instances
+
+We'll use `AsyncLocalStorage` for request-scoped metadata and our `MapWithTTL` for the actual cache. We also need a way to map tags to cache keys.
+
+```javascript
+// cache.js (Partial 2 - add this below MapWithTTL)
+import { AsyncLocalStorage } from 'node:async_hooks';
+import crypto from 'node:crypto'; // For generating unique IDs
+
+// 1. Context Storage: Manages metadata (tags, TTL) for the current async flow
+const cacheContext = new AsyncLocalStorage();
+
+// 2. Main Cache: Stores the actual cached data using our TTL-enabled Map
+const globalCache = new MapWithTTL();
+
+// 3. Tag Mapping: Links tags to cache keys for revalidation
+//    A tag might map to multiple cache keys if different function calls use the same tag.
+//    So, a tag maps to a Set of cache keys.
+const tagToCacheKeysMap = new Map(); // Map<string, Set<string>>
+```
+
+**How they interact:**
+
+  - `cacheContext`: When a wrapped function is called, we'll `run` it within a new `cacheContext` store. Helper functions like `cacheTag` will modify this store.
+  - `globalCache`: Stores `cacheKey -> { data, expirationTime }`.
+  - `tagToCacheKeysMap`: Stores `tag -> Set_of_cacheKeys`. When data is cached with a tag, we update this map. When `revalidateTag` is called, we use this map to find and delete entries from `globalCache`.
+
+### Step 3: Implementing the Core Cache Wrapper (`cacheWrapper`)
+
+This higher-order function will contain the main caching logic.
+
+```javascript
+// cache.js (Partial 3 - add this below storage instances)
+export function cacheWrapper(fn) {
+  // Generate a unique ID for this specific function being wrapped.
+  // This helps differentiate caches if multiple functions have the same arguments.
+  const functionId = crypto.randomUUID();
+
+  const cachedFunction = async (...args) => {
+    // Create a unique cache key based on the function ID and its arguments.
+    // JSON.stringify is a common way, but has limitations (e.g., order of keys in objects, undefined).
+    // For robust solutions, consider more stable serialization.
+    const argumentsKey = JSON.stringify(args);
+    const cacheKey = `${functionId}:${argumentsKey}`;
+
+    // Initialize a context for this specific call.
+    // This store will be accessible by cacheTag and cacheLife within fn's execution.
+    const currentCallContext = {
+      tags: new Set(), // A call can have multiple tags
+      ttl: undefined, // Default TTL will be Infinity unless overridden by cacheLife
+    };
+
+    return cacheContext.run(currentCallContext, async () => {
+      // 1. Check if data is already in cache and not expired
+      if (globalCache.has(cacheKey)) {
+        console.log(`💾 Cache hit for key: ${cacheKey}`);
+        return globalCache.get(cacheKey);
+      }
+
+      // 2. If not in cache (cache miss), execute the original function
+      console.log(`🔍 Cache miss! Executing function for key: ${cacheKey}`);
+      const result = await fn(...args);
+
+      // 3. Store the result in the cache
+      //    The `ttl` and `tags` would have been set by `cacheLife` and `cacheTag`
+      //    called within `fn`'s execution, populating `currentCallContext`.
+      if (result != null) {
+        // Avoid caching null or undefined unless intended
+        globalCache.set(cacheKey, {
+          data: result,
+          ttl: currentCallContext.ttl, // Uses ttl from context, or MapWithTTL's default
+        });
+        console.log(
+          `📝 Cached result for key: ${cacheKey} with TTL: ${
+            currentCallContext.ttl || 'Infinity'
+          }`
+        );
+
+        // Link tags to this cache key
+        if (currentCallContext.tags.size > 0) {
+          currentCallContext.tags.forEach((tag) => {
+            if (!tagToCacheKeysMap.has(tag)) {
+              tagToCacheKeysMap.set(tag, new Set());
+            }
+            tagToCacheKeysMap.get(tag).add(cacheKey);
+            console.log(`🏷️ Tagged key ${cacheKey} with: ${tag}`);
+          });
+        }
+      }
+      return result;
+    });
+  };
+  return cachedFunction;
+}
+```
+
+### Step 4: Adding Cache Control Functions (`cacheTag`, `cacheLife`, `revalidateTag`)
+
+These functions will interact with the `cacheContext` and our storage maps.
+
+```javascript
+// cache.js (Partial 4 - add this below cacheWrapper)
+
+// Call this INSIDE a 'use cache' function to associate tags with its result.
+export function cacheTag(...tags) {
+  const store = cacheContext.getStore();
+  if (!store) {
+    // This can happen if cacheTag is called outside a cacheWrapper's execution scope.
+    // In a real Next.js/React environment, this might throw or be a no-op.
+    throw new Error(
+      'cacheTag called outside of a cached function context. Tags will not be applied.'
+    );
+  }
+  tags.forEach((tag) => store.tags.add(tag));
+}
+
+// Call this INSIDE a 'use cache' function to set a specific TTL for its result.
+export function cacheLife(ttlInMilliseconds) {
+  const store = cacheContext.getStore();
+  if (!store) {
+    throw new Error(
+      'cacheLife called outside of a cached function context. TTL will not be applied.'
+    );
+  }
+  if (typeof ttlInMilliseconds !== 'number' || ttlInMilliseconds <= 0) {
+    throw new RangeError(
+      'Invalid TTL value for cacheLife. Must be a positive number.'
+    );
+  }
+  store.ttl = ttlInMilliseconds;
+}
+
+// Call this to revalidate (clear) cache entries associated with a specific tag.
+export function revalidateTag(tagToRevalidate) {
+  const cacheKeysToRevalidate = tagToCacheKeysMap.get(tagToRevalidate);
+
+  if (cacheKeysToRevalidate && cacheKeysToRevalidate.size > 0) {
+    console.log(`🗑️ Revalidating cache for tag: ${tagToRevalidate}`);
+    cacheKeysToRevalidate.forEach((cacheKey) => {
+      globalCache.delete(cacheKey);
+      console.log(`   - Deleted key: ${cacheKey}`);
+    });
+    // Remove the tag itself from the mapping as all its keys are gone
+    tagToCacheKeysMap.delete(tagToRevalidate);
+  } else {
+    console.log(`🤷 No cache entries found for tag: ${tagToRevalidate}`);
+  }
+}
+```
+
+### The Complete `cache.js` Implementation
+
+Let's assemble all the pieces into the final `cache.js` file.
+
+```javascript
+// cache.js (Complete)
+import { AsyncLocalStorage } from 'node:async_hooks';
+import crypto from 'node:crypto';
+
+class MapWithTTL extends Map {
+  set(key, valueWithOptions) {
+    const { data, ttl = Infinity } = valueWithOptions;
+    let expirationTime = Infinity;
+    if (ttl !== Infinity && typeof ttl === 'number' && ttl > 0) {
+      expirationTime = Date.now() + ttl;
+    }
+    super.set(key, { data, expirationTime });
+    return this;
+  }
+
+  get(key) {
+    const entry = super.get(key);
+    if (entry) {
+      if (entry.expirationTime <= Date.now()) {
+        this.delete(key);
+        return undefined;
+      }
+      return entry.data;
+    }
+    return undefined;
+  }
+
+  has(key) {
+    return this.get(key) !== undefined;
+  }
+}
+
+const cacheContext = new AsyncLocalStorage();
+const globalCache = new MapWithTTL();
+const tagToCacheKeysMap = new Map(); // Map<string, Set<string>>
+
+export function cacheWrapper(fn) {
+  const functionId = crypto.randomUUID();
+  const cachedFunction = async (...args) => {
+    const argumentsKey = JSON.stringify(args);
+    const cacheKey = `${functionId}:${argumentsKey}`;
+    const currentCallContext = {
+      tags: new Set(),
+      ttl: undefined,
+    };
+
+    return cacheContext.run(currentCallContext, async () => {
+      if (globalCache.has(cacheKey)) {
+        console.log(`💾 Cache hit for key: ${cacheKey}`);
+        return globalCache.get(cacheKey);
+      }
+      console.log(`🔍 Cache miss! Executing function for key: ${cacheKey}`);
+      const result = await fn(...args);
+      if (result != null) {
+        globalCache.set(cacheKey, {
+          data: result,
+          ttl: currentCallContext.ttl,
+        });
+        console.log(
+          `📝 Cached result for key: ${cacheKey} with TTL: ${
+            currentCallContext.ttl || 'Infinity'
+          }`
+        );
+        if (currentCallContext.tags.size > 0) {
+          currentCallContext.tags.forEach((tag) => {
+            if (!tagToCacheKeysMap.has(tag)) {
+              tagToCacheKeysMap.set(tag, new Set());
+            }
+            tagToCacheKeysMap.get(tag).add(cacheKey);
+            console.log(`🏷️ Tagged key ${cacheKey} with: ${tag}`);
+          });
+        }
+      }
+      return result;
+    });
+  };
+  return cachedFunction;
+}
+
+export function cacheTag(...tags) {
+  const store = cacheContext.getStore();
+  if (!store) {
+    throw new Error(
+      'cacheTag called outside of a cached function context. Tags will not be applied.'
+    );
+  }
+  tags.forEach((tag) => store.tags.add(tag));
+}
+
+export function cacheLife(ttlInMilliseconds) {
+  const store = cacheContext.getStore();
+  if (!store) {
+    throw new Error(
+      'cacheLife called outside of a cached function context. TTL will not be applied.'
+    );
+  }
+  if (typeof ttlInMilliseconds !== 'number' || ttlInMilliseconds <= 0) {
+    throw new RangeError(
+      'Invalid TTL value for cacheLife. Must be a positive number.'
+    );
+  }
+  store.ttl = ttlInMilliseconds;
+}
+
+export function revalidateTag(tagToRevalidate) {
+  const cacheKeysToRevalidate = tagToCacheKeysMap.get(tagToRevalidate);
+  if (cacheKeysToRevalidate && cacheKeysToRevalidate.size > 0) {
+    console.log(`🗑️ Revalidating cache for tag: ${tagToRevalidate}`);
+    cacheKeysToRevalidate.forEach((cacheKey) => {
+      globalCache.delete(cacheKey);
+      console.log(`   - Deleted key: ${cacheKey}`);
+    });
+    tagToCacheKeysMap.delete(tagToRevalidate);
+  } else {
+    console.log(`🤷 No cache entries found for tag: ${tagToRevalidate}`);
+  }
+}
+```
+
+
+## Putting It All Together: A Complete Example
+
+Let's create an example file (`app.js`) that uses our caching system. This file would be the one processed by our hypothetical build transformer.
+
+```javascript
+// app.js (This is the file you'd "compile" or run after transformation)
+// For this example, we'll assume it's already transformed,
+// so we'll import cacheWrapper directly for testing.
+// In a real scenario with 'use cache', the transformer does this.
+
+// For testing without the transformer, we manually import and wrap.
+// If using the transformer, these imports are handled by it.
+import { cacheWrapper, cacheTag, cacheLife, revalidateTag } from './cache.js';
+
+// --- Original code that would have 'use cache' ---
+async function _getPokemonData(pokemonName) {
+  // 'use cache'; // Directive would be here
+
+  // Use our cache control functions
+  cacheTag('pokemon', `pokemon-${pokemonName}`);
+  cacheLife(60 * 1000); // Cache for 1 minute
+
+  console.log(`Fetching ${pokemonName} data from API...`);
+  // Simulate API call
+  await new Promise((resolve) =>
+    setTimeout(resolve, 100 + Math.random() * 200)
+  );
+  return {
+    name: pokemonName,
+    id: Math.floor(Math.random() * 1000),
+    fetchedAt: new Date().toISOString(),
+  };
+}
+
+async function _getTrainerData(trainerId) {
+  // 'use cache';
+  cacheTag('trainer', `trainer-${trainerId}`);
+  cacheLife(5 * 60 * 1000); // Cache for 5 minutes
+
+  console.log(`Fetching trainer ${trainerId} data from API...`);
+  await new Promise((resolve) =>
+    setTimeout(resolve, 150 + Math.random() * 100)
+  );
+  return {
+    id: trainerId,
+    name: `Trainer ${trainerId}`,
+    team: [Math.random() > 0.5 ? 'pikachu' : 'charmander'],
+    fetchedAt: new Date().toISOString(),
+  };
+}
+// --- End of original code ---
+
+// Manually wrap for this test since we're not running a full build transform
+const getPokemonData = cacheWrapper(_getPokemonData);
+const getTrainerData = cacheWrapper(_getTrainerData);
+
+async function main() {
+  console.log('--- Scenario 1: Fetching Pikachu ---');
+  let pikachu = await getPokemonData('pikachu');
+  console.log('Fetched:', pikachu);
+
+  console.log(
+    '\n--- Scenario 2: Fetching Pikachu again (should be cached) ---'
+  );
+  pikachu = await getPokemonData('pikachu');
+  console.log('Fetched (cached):', pikachu);
+
+  console.log('\n--- Scenario 3: Fetching Charmander ---');
+  let charmander = await getPokemonData('charmander');
+  console.log('Fetched:', charmander);
+
+  console.log('\n--- Scenario 4: Fetching Trainer Ash ---');
+  let ash = await getTrainerData('Ash');
+  console.log('Fetched:', ash);
+
+  console.log('\n--- Scenario 5: Revalidating "pokemon-pikachu" tag ---');
+  revalidateTag('pokemon-pikachu');
+
+  console.log(
+    '\n--- Scenario 6: Fetching Pikachu again (should be a new fetch) ---'
+  );
+  pikachu = await getPokemonData('pikachu');
+  console.log('Fetched (after targeted revalidation):', pikachu);
+
+  console.log(
+    '\n--- Scenario 7: Fetching Charmander again (should be cached) ---'
+  );
+  charmander = await getPokemonData('charmander');
+  console.log('Fetched (cached):', charmander);
+
+  console.log('\n--- Scenario 8: Revalidating general "pokemon" tag ---');
+  revalidateTag('pokemon'); // This should revalidate Charmander too (and Pikachu if it was re-cached)
+
+  console.log(
+    '\n--- Scenario 9: Fetching Charmander again (should be a new fetch) ---'
+  );
+  charmander = await getPokemonData('charmander');
+  console.log('Fetched (after general revalidation):', charmander);
+
+  console.log(
+    '\n--- Scenario 10: Waiting for Pikachu to expire (1 minute) ---'
+  );
+  // Re-fetch Pikachu to get it into cache with its 1-min TTL
+  await getPokemonData('pikachu');
+  console.log('Pikachu re-cached. Waiting 65 seconds for TTL expiration...');
+  await new Promise((resolve) => setTimeout(resolve, 65 * 1000));
+
+  console.log('\n--- Scenario 11: Fetching Pikachu after TTL expiration ---');
+  pikachu = await getPokemonData('pikachu');
+  console.log('Fetched (after TTL):', pikachu);
+}
+
+main().catch(console.error);
+```
+
+**To run this example:**
+
+1.  Save the complete `cache.js` code into a file named `cache.js`.
+2.  Save the `app.js` code above into a file named `app.js` in the same directory.
+3.  Run `node app.js` from your terminal in that directory.
+
+You will observe console logs demonstrating cache hits, misses, tagging, revalidation, and TTL expiration.
+
+
+## How to Use This with a Build Step (Conceptual)
+
+In a real Next.js project, you wouldn't manually wrap functions. The `'use cache'` directive would be processed by the build system. To simulate this:
+
+1.  **Create a build script (`build-app.js`):**
+
+    ```javascript
+    // build-app.js
+    import { createDirectiveTransformer } from 'directive-to-hof';
+    import { readFile, writeFile, mkdir } from 'node:fs/promises';
+    import path from 'node:path';
+
+    const inputFile = process.argv[2]; // e.g., './src/app-source.js'
+    if (!inputFile) {
+      console.error('Please provide an input file.');
+      process.exit(1);
+    }
+    const outputDir = './dist';
+    const outputFilename = path.basename(inputFile);
+    const outputFile = path.join(outputDir, outputFilename);
+
+    const transformer = createDirectiveTransformer({
+      directive: 'use cache',
+      importPath: '../cache.js', // Relative path from output file to cache.js
+      importName: 'cacheWrapper',
+      asyncOnly: true,
+    });
+
+    async function build() {
+      try {
+        await mkdir(outputDir, { recursive: true });
+        const code = await readFile(inputFile, 'utf-8');
+        const { contents } = await transformer(code, { path: inputFile }); // Provide path for correct import resolution
+        await writeFile(outputFile, contents, 'utf-8');
+        console.log(`Successfully transformed ${inputFile} to ${outputFile}`);
+        console.log(`Run with: node ${outputFile}`);
+      } catch (error) {
+        console.error('Build failed:', error);
+      }
+    }
+
+    build();
+    ```
+
+2.  **Create your source file with `'use cache'` (e.g., `src/app-source.js`):**
+    This would be similar to `app.js` but with `_getPokemonData` actually containing `'use cache';` and not being manually wrapped. The `cacheWrapper` import would be handled by the transformer.
+
+    ```javascript
+    // src/app-source.js
+    // Note: For this to work with the build script, cache.js should be in the root,
+    // or importPath in build-app.js needs to be adjusted.
+    // Let's assume cache.js is in the project root, and src/ is where app-source.js is.
+    // Then importPath should be '../cache.js' as set in build-app.js.
+
+    import { cacheTag, cacheLife, revalidateTag } from '../cache.js'; // These are still needed.
+
+    async function getPokemonData(pokemonName) {
+      'use cache'; // The magic directive!
+
+      cacheTag('pokemon', `pokemon-${pokemonName}`);
+      cacheLife(60 * 1000);
+
+      console.log(`Fetching ${pokemonName} data from API...`);
+      await new Promise((resolve) =>
+        setTimeout(resolve, 100 + Math.random() * 200)
+      );
+      return {
+        name: pokemonName,
+        id: Math.floor(Math.random() * 1000),
+        fetchedAt: new Date().toISOString(),
+      };
+    }
+    // ... (rest of the main function and other data functions using 'use cache')
+    // For brevity, imagine the full main() and getTrainerData() from the previous app.js here.
+    // For a runnable example, copy the _getTrainerData and main function here,
+    // renaming _getTrainerData to getTrainerData and adding 'use cache'.
+
+    // Example main (simplified for this snippet)
+    async function main() {
+      let p = await getPokemonData('bulbasaur');
+      console.log(p);
+      p = await getPokemonData('bulbasaur'); // should hit cache
+      console.log(p);
+    }
+    main();
+    ```
+
+3.  **Add a script to `package.json`:**
+
+    ```json
+    {
+      "type": "module", // Important for using import/export
+      "scripts": {
+        "build": "node build-app.js ./src/app-source.js"
+      },
+      "dependencies": {
+        "directive-to-hof": "^1.0.0" // Or your installed version
+      }
+    }
+    ```
+
+4.  **Run the build and then the compiled file:**
+
+    ```bash
+    npm run build
+    node ./dist/app-source.js
+    ```
+
+
+## Key Takeaways & Considerations
+
+1.  **`'use cache'` is Syntactic Sugar**: It relies on a build transformation to wrap functions with caching logic, often using a higher-order function.
+2.  **`AsyncLocalStorage` is Crucial**: For server-side rendering in Node.js environments, it enables context propagation through asynchronous operations, allowing functions like `cacheTag` and `cacheLife` to affect the correct cache entry.
+3.  **Cache Key Generation**: `JSON.stringify(args)` is simple but has limitations (e.g., object key order, `undefined` values, functions, Symbols). More robust serialization might be needed for complex arguments.
+4.  **Scope of Cache**: Our `globalCache` is global to the Node.js process. In Next.js, `'use cache'` is typically request-scoped memoization. The more persistent Data Cache (for `fetch`) is different. For a true request-scoped cache like `'use cache'`, you'd often clear or use a new `Map` instance per request, or integrate `AsyncLocalStorage` even more deeply into the `cacheWrapper` to hold the cache store itself.
+5.  **Advanced Features**: We've implemented tagging, TTL, and revalidation, which are essential for managing cache effectively.
+6.  **Real-World Next.js/React Caching**: The actual implementation in React (`cache` function) and Next.js is more deeply integrated with React's rendering lifecycle and server infrastructure. It handles request memoization by default. Our example builds a more generic caching utility inspired by it.
+
+This deep dive provides a solid foundation for understanding how such caching directives can be implemented. While our version is simplified, it captures the core mechanics involved in directive-based caching, context management with `AsyncLocalStorage`, and common caching features.
+
+Happy Caching! 🚀

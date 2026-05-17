@@ -1,0 +1,95 @@
+---
+title: 'Essential TypeScript Tips for Better Code'
+date: '2023-03-20'
+description: 'Improve your TypeScript skills with these practical tips and best practices for writing cleaner, more maintainable code.'
+---
+
+TypeScript has become an essential tool for JavaScript developers. Here are some tips to help you write better TypeScript code.
+
+## 1. Use Strict Mode
+
+Always enable strict mode in your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "strict": true
+  }
+}
+```
+
+This enables a suite of type-checking flags that catch more potential errors.
+
+## 2. Leverage Type Inference
+
+TypeScript is smart about inferring types. Don't add annotations when they're not needed:
+
+```typescript
+// Good - TypeScript infers the type
+const count = 5;
+
+// Unnecessary
+const count: number = 5;
+```
+
+## 3. Use Interfaces for Objects
+
+Interfaces are perfect for defining object shapes:
+
+```typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  age?: number; // Optional property
+}
+
+function greetUser(user: User) {
+  console.log(`Hello, ${user.name}!`);
+}
+```
+
+## 4. Union Types for Flexibility
+
+Union types allow a value to be one of several types:
+
+```typescript
+type ID = string | number;
+
+function getUserById(id: ID) {
+  // Implementation...
+}
+```
+
+## 5. Type Guards for Runtime Checks
+
+Use type guards to narrow types within conditional blocks:
+
+```typescript
+function processValue(value: string | number) {
+  if (typeof value === 'string') {
+    // TypeScript knows value is a string here
+    return value.toUpperCase();
+  } else {
+    // TypeScript knows value is a number here
+    return value.toFixed(2);
+  }
+}
+```
+
+## 6. Generics for Reusable Components
+
+Generics allow you to create reusable components:
+
+```typescript
+function getFirstItem<T>(array: T[]): T | undefined {
+  return array[0];
+}
+
+const firstNumber = getFirstItem([1, 2, 3]); // Type: number
+const firstString = getFirstItem(['a', 'b', 'c']); // Type: string
+```
+
+## Conclusion
+
+TypeScript can significantly improve your development experience by catching errors early and providing better tooling. By following these tips, you'll write more maintainable and robust code.

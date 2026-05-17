@@ -1,0 +1,283 @@
+---
+title: 'Using Bitfields for Permissions and Feature Flags'
+date: '2025-09-03'
+description: 'Learn how to use bitfields for efficient permission systems and feature flags with TypeScript'
+---
+
+# Introduction
+
+Bitfields are a powerful technique for managing permissions and feature flags efficiently. I learned about bitfields since the beginning of my career back in late 2018, thanks to Discord's [permissions documentation](https://discord.com/developers/docs/topics/permissions#permissions).
+
+Instead of storing multiple boolean values or arrays, bitfields pack multiple flags into a single number using bitwise operations. This approach is memory-efficient, fast, and perfect for systems that need to check many permissions or features quickly.
+
+## How Bitfields Work
+
+A bitfield uses individual bits in a number to represent different flags. Each bit position represents a specific permission or feature:
+
+| Bit Position | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+|--------------|---|---|---|---|---|---|---|---|
+| Binary   | 1 | 0 | 1 | 0 | 1 | 1 | 0 | 1 |
+
+In this example the decimal value `173` is represented as `10101101` in binary. Bits `0`, `2`, `3`, `5`, and `7` are set `(1)`, while bits `1`, `4`, and `6` are unset `(0)`.
+
+## Logic Gates and Bitwise Operations
+
+Bitfields work using basic logic gates. Here's how each one works with truth tables:
+
+### AND (&) - Checks if a bit is set
+The AND operation returns 1 only when both inputs are 1:
+
+| A | B | A & B |
+|---|---|-------|
+| 0 | 0 |   0   |
+| 0 | 1 |   0   |
+| 1 | 0 |   0   |
+| 1 | 1 |   1   |
+
+### OR (|) - Sets a bit
+The OR operation returns 1 when at least one input is 1:
+
+| A | B | A \| B |
+|---|---|--------|
+| 0 | 0 |   0    |
+| 0 | 1 |   1    |
+| 1 | 0 |   1    |
+| 1 | 1 |   1    |
+
+### XOR (^) - Toggles a bit
+The XOR operation returns 1 when inputs are different:
+
+| A | B | A ^ B |
+|---|---|-------|
+| 0 | 0 |   0   |
+| 0 | 1 |   1   |
+| 1 | 0 |   1   |
+| 1 | 1 |   0   |
+
+### NOT (~) - Flips all bits
+The NOT operation flips each bit (0 becomes 1, 1 becomes 0):
+
+| A | ~A |
+|---|----|
+| 0 | 1  |
+| 1 | 0  |
+
+Programmatically you can use the following operations:
+
+```typescript
+// Example with 8-bit number: 10101101 (173)
+const value = 173n; // Binary: 10101101
+
+// Check if bit 2 is set (AND operation)
+const isBit2Set = (value & (1n << 2n)) !== 0n; // true
+
+// Set bit 1 (OR operation)
+const setBit1 = value | (1n << 1n); // 175n (10101111)
+
+// Toggle bit 0 (XOR operation)
+const toggleBit0 = value ^ (1n << 0n); // 172n (10101100)
+
+// remove bit 2
+const removeBit2 = value & ~(1n << 2n); // 169n (10101001)
+```
+
+## Basic BitField Implementation
+
+Here's a simple BitField class for managing permissions:
+
+```typescript
+class BitField {
+  private value: bigint;
+
+  constructor(value: bigint | string | number = 0n) {
+    this.value = BigInt(value);
+  }
+
+  // Add a permission (set bit)
+  add(permission: bigint): this {
+    this.value |= (1n << permission);
+    return this;
+  }
+
+  // Remove a permission (clear bit)
+  remove(permission: bigint): this {
+    this.value &= ~(1n << permission);
+    return this;
+  }
+
+  // Toggle a permission (flip bit)
+  toggle(permission: bigint): this {
+    this.value ^= (1n << permission);
+    return this;
+  }
+
+  // Check if permission exists (check bit)
+  has(permission: bigint): boolean {
+    return (this.value & (1n << permission)) !== 0n;
+  }
+
+  // Check if all permissions exist
+  hasAll(permissions: bigint[]): boolean {
+    return permissions.every(permission => this.has(permission));
+  }
+
+  // Check if any permission exists
+  hasSome(permissions: bigint[]): boolean {
+    return permissions.some(permission => this.has(permission));
+  }
+
+  // Get all set permissions
+  toArray(): bigint[] {
+    const permissions: bigint[] = [];
+    let temp = this.value;
+    let position = 0n;
+
+    while (temp > 0n) {
+      if (temp & 1n) {
+        permissions.push(position);
+      }
+      temp >>= 1n;
+      position++;
+    }
+
+    return permissions;
+  }
+
+  // Serialize to string for storage/transfer
+  toString(): string {
+    return this.value.toString();
+  }
+
+  // Create from string
+  static fromString(value: string): BitField {
+    return new BitField(value);
+  }
+}
+```
+
+## Permission System Example
+
+```typescript
+// Define permission constants using bit shifts
+const PERMISSIONS = {
+  READ: 1n << 0n,      // 1n
+  WRITE: 1n << 1n,     // 2n
+  DELETE: 1n << 2n,    // 4n
+  ADMIN: 1n << 3n,     // 8n
+  MODERATE: 1n << 4n,  // 16n
+} as const;
+
+// Create user permissions
+const userPermissions = new BitField()
+  .add(PERMISSIONS.READ)
+  .add(PERMISSIONS.WRITE);
+
+// Check permissions
+console.log(userPermissions.has(PERMISSIONS.READ));  // true
+console.log(userPermissions.has(PERMISSIONS.DELETE)); // false
+
+// Add admin permission
+userPermissions.add(PERMISSIONS.ADMIN);
+
+// Check multiple permissions
+console.log(userPermissions.hasAll([PERMISSIONS.READ, PERMISSIONS.WRITE])); // true
+
+// Serialize for database storage
+const serialized = userPermissions.toString(); // "11"
+```
+
+## Feature Flags Example
+
+```typescript
+const FEATURES = {
+  DARK_MODE: 1n << 0n,
+  PREMIUM_CONTENT: 1n << 1n,
+  BETA_FEATURES: 1n << 2n,
+  ANALYTICS: 1n << 3n,
+  NOTIFICATIONS: 1n << 4n,
+} as const;
+
+class User {
+  private features: BitField;
+
+  constructor(features: string = "0") {
+    this.features = BitField.fromString(features);
+  }
+
+  enableFeature(feature: bigint): void {
+    this.features.add(feature);
+  }
+
+  disableFeature(feature: bigint): void {
+    this.features.remove(feature);
+  }
+
+  hasFeature(feature: bigint): boolean {
+    return this.features.has(feature);
+  }
+
+  getFeatures(): string {
+    return this.features.toString();
+  }
+}
+
+// Usage
+const user = new User();
+user.enableFeature(FEATURES.DARK_MODE);
+user.enableFeature(FEATURES.PREMIUM_CONTENT);
+
+console.log(user.hasFeature(FEATURES.DARK_MODE)); // true
+console.log(user.getFeatures()); // "3"
+```
+
+## Advantages and Disadvantages
+
+### Advantages
+
+| Advantage | Description |
+|-----------|-------------|
+| **Memory Efficient** | Single number instead of multiple booleans |
+| **Fast Operations** | Bitwise operations are extremely fast |
+| **Easy Serialization** | Single value to store/transfer |
+| **Atomic Operations** | All flags updated together |
+
+### Disadvantages
+
+| Disadvantage | Description |
+|--------------|-------------|
+| **Not Human Readable** | Requires bit manipulation knowledge |
+| **Debugging Difficulty** | Hard to understand raw values |
+| **Memory Usage** | Can use significant memory with many flags |
+
+## When to Use Bitfields
+
+**Use bitfields when:**
+- You have many boolean flags (10+)
+- Performance is critical
+- You need atomic flag operations
+- Memory usage matters
+- Flags are frequently checked together
+
+**Don't use bitfields when:**
+- You have few flags (< 5)
+- Flags have complex relationships
+- You need human-readable configuration
+- Flags change frequently during runtime
+
+## Important Notes
+
+**Always use `bigint` type** to declare bitfields and serialize it to a string to store it or transfer it over the wire because JavaScript numbers are limited to 32-bit bitwise operations.
+
+```typescript
+// ❌ Wrong - limited to 32-bit operations
+const permissions: number = 1 << 32; // 1 (wraps around)
+
+// ✅ Correct - use bigint for unlimited precision
+const permissions: bigint = 1n << 32n; // 4294967296n (exact)
+```
+
+## Conclusion
+
+Bitfields are a powerful tool for managing permissions and feature flags efficiently. They provide excellent performance and memory usage at the cost of some readability. Use them when you need to manage many boolean flags and performance is important.
+
+The key is to use `bigint` for large bitfields, serialize to strings for storage, and use bit shift operations (`1 << n`) instead of magic numbers for better maintainability.
