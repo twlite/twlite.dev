@@ -104,7 +104,6 @@ interface MDXContentProps {
 export function MDXContent({ source }: MDXContentProps) {
   return (
     <article className="blog-content">
-      {" "}
       <MDXRemote
         source={source}
         components={components}

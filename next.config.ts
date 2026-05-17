@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
 import { withStaticBlogPosts } from "./scripts/static-blog-posts.mjs";
+import { withStaticPhotographs } from "./scripts/static-photographs.mjs";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
@@ -44,4 +45,4 @@ const withMDX = createMDX({
   },
 });
 
-export default withMDX(withStaticBlogPosts(nextConfig));
+export default withMDX(withStaticPhotographs(withStaticBlogPosts(nextConfig)));

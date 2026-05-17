@@ -63,7 +63,11 @@ ${orderedPosts}
 }
 
 export function renderBlogPostSummariesModule(posts) {
-  const summaries = posts.map(({ content, ...post }) => post);
+  const summaries = posts.map((post) => {
+    const summary = { ...post };
+    delete summary.content;
+    return summary;
+  });
   const entries = summaries
     .map((post) => {
       return `  ${JSON.stringify(post.slug)}: ${JSON.stringify(post, null, 2).replace(/\n/g, "\n  ")},`;

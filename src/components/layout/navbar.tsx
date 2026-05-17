@@ -3,8 +3,12 @@ import NavbarLinks from "./navbar-links";
 
 export default function Navbar() {
   return (
-    <nav className="flex items-center justify-between mb-4">
-      <Link href="/">
+    <nav className="relative mb-6 flex items-center justify-between">
+      <Link
+        href="/"
+        className="rounded-full ring-neutral-700 transition focus-visible:outline-none focus-visible:ring-2"
+        aria-label="Home"
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="https://github.com/twlite.png"

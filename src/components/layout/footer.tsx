@@ -45,7 +45,7 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="flex flex-wrap gap-3 border-t mt-4 pt-4 border-neutral-800">
+    <footer className="flex flex-wrap items-center justify-center gap-3 border-t mt-4 pt-4 border-neutral-800">
       {socialLinks.map((link) => (
         <SocialLink
           key={link.url}
