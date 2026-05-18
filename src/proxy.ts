@@ -1,16 +1,24 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
   const accept = request.headers.get("accept") || "";
 
   const isMarkdown = accept.includes("text/markdown");
   const isJSON = accept.includes("application/json");
 
+  const blogMatch = pathname.match(/^\/blog\/([^/]+)$/);
+  if (blogMatch) {
+    return NextResponse.redirect(
+      new URL(`/blogs/${blogMatch[1]}`, request.url),
+    );
+  }
+
   if (!isMarkdown && !isJSON) {
     return NextResponse.next();
   }
 
-  const slug = request.nextUrl.pathname.match(/^\/blogs\/([^/]+)$/)?.[1];
+  const slug = pathname.match(/^\/blogs\/([^/]+)$/)?.[1];
 
   if (!slug) {
     return NextResponse.next();
@@ -26,5 +34,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/blogs/:slug",
+  matcher: ["/blog/:slug", "/blogs/:slug"],
 };
