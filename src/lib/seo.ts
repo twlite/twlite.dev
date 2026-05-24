@@ -10,6 +10,13 @@ export const site = {
 
 export const absoluteUrl = (path = "/") => new URL(path, site.url).toString();
 
+export const ogImageUrl = (title: string, description: string) => {
+  const url = new URL("/api/og", site.url);
+  url.searchParams.set("title", title);
+  url.searchParams.set("description", description);
+  return url.toString();
+};
+
 export const createPageMetadata = ({
   title,
   description = site.description,
@@ -22,11 +29,7 @@ export const createPageMetadata = ({
   type?: "website" | "article";
 }): Metadata => {
   const url = absoluteUrl(path);
-  const image = absoluteUrl(
-    `/api/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(
-      description,
-    )}`,
-  );
+  const image = ogImageUrl(title, description);
 
   return {
     title,

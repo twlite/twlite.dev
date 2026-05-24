@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
-import ContentLink from "@/components/content-link";
-import Footer from "@/components/layout/footer";
-import Shell from "@/components/layout/shell";
-import { createPageMetadata } from "@/lib/seo";
+import type { Metadata } from 'next';
+import ContentLink from '@/components/content-link';
+import Footer from '@/components/layout/footer';
+import Shell from '@/components/layout/shell';
+import { createPageMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Kunjan Dhungana",
+  title: 'Kunjan Dhungana',
   description:
-    "Software engineer from Nepal working on TypeScript, runtimes, developer tooling, maintainable systems, and learning piano on the side.",
-  path: "/",
+    'Software engineer from Nepal working on TypeScript, runtimes, developer tooling, maintainable systems, and learning piano on the side.',
+  path: '/',
 });
 
 export default function Home() {
@@ -17,7 +17,7 @@ export default function Home() {
       <Shell title="Kunjan Dhungana">
         <div className="space-y-5 text-sm leading-7 text-neutral-400">
           <p>
-            Self-taught software engineer from Nepal. Co-founder of{" "}
+            Self-taught software engineer from Nepal. Co-founder of{' '}
             <ContentLink url="https://neplextech.com" name="Neplex" />, a
             product studio building open source developer tools and
             infrastructure.
@@ -28,9 +28,9 @@ export default function Home() {
             <p>
               I work mostly in TypeScript, Rust, and Node.js. I am interested in
               runtimes, developer tooling, and systems that stay maintainable as
-              they grow. Recently that has meant working on{" "}
+              they grow. Recently that has meant working on{' '}
               <ContentLink url="https://commandkit.dev" name="CommandKit" />, a
-              meta-framework for Discord.js bots, and{" "}
+              meta-framework for Discord.js bots, and{' '}
               <ContentLink url="https://yasumu.dev" name="Yasumu" />, an API
               testing tool with an embedded Deno runtime inside a native desktop
               app. See the <ContentLink url="/projects" name="projects" /> page
@@ -62,11 +62,11 @@ export default function Home() {
               Featured Song
             </h2>
             <p>
-              I have been listening to{" "}
+              I have been listening to{' '}
               <ContentLink
                 url="https://music.youtube.com/watch?v=PgI2n7hTuXs"
                 name="Bachau by Albatross"
-              />{" "}
+              />{' '}
               on repeat — Albatross is my favorite band, and their sound has
               been a constant in my everyday listening.
             </p>
@@ -84,10 +84,6 @@ export default function Home() {
                   Bachau · Albatross
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="rounded bg-neutral-800 px-1.5 py-0.5 text-neutral-400">
-                    Nepali Rock
-                  </span>
-                  <span>2024</span>
                   <span>#EverydayListen</span>
                 </div>
               </div>

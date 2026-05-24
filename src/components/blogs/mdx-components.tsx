@@ -6,6 +6,7 @@ import rehypePrettyCode, { Options } from "rehype-pretty-code";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 import { JetBrains_Mono } from "next/font/google";
+import { withUtm } from "@/lib/utm";
 import CodeBlock from "./code-block";
 
 const jetBrainsMono = JetBrains_Mono({
@@ -45,7 +46,12 @@ const components = {
 
     if (href && (href.startsWith("http") || href.startsWith("mailto:"))) {
       return (
-        <a href={href} target="_blank" rel="noopener noreferrer" {...props} />
+        <a
+          href={withUtm(href)}
+          target="_blank"
+          rel="noopener noreferrer"
+          {...props}
+        />
       );
     }
 

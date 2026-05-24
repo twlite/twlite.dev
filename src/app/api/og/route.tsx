@@ -8,10 +8,22 @@ const size = {
   height: 630,
 };
 
+function parseQuery(url: string) {
+  const qs = url.includes("?") ? url.split("?")[1] : "";
+  const params = new Map<string, string>();
+  for (const raw of qs.split(/[&;]/)) {
+    const pair = raw.replace(/^amp;/, "");
+    const sep = pair.indexOf("=");
+    if (sep === -1) continue;
+    params.set(decodeURIComponent(pair.slice(0, sep)), decodeURIComponent(pair.slice(sep + 1).replace(/\+/g, " ")));
+  }
+  return params;
+}
+
 export function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const title = searchParams.get("title") || site.name;
-  const description = searchParams.get("description") || site.description;
+  const params = parseQuery(request.url);
+  const title = params.get("title") || site.name;
+  const description = params.get("description") || site.description;
 
   return new ImageResponse(
     <div

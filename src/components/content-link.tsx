@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { withUtm } from "@/lib/utm";
 
 export default function ContentLink({
   url,
@@ -9,7 +10,7 @@ export default function ContentLink({
 }) {
   return (
     <Link
-      href={url}
+      href={withUtm(url)}
       rel="noreferrer noopener"
       className="text-neutral-50 font-medium underline hover:text-neutral-200"
     >

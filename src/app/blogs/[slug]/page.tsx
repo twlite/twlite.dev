@@ -77,6 +77,9 @@ export default function BlogContentPage({
 
   return (
     <Shell title={post.title}>
+      <p className="mb-5 text-sm leading-6 text-neutral-400">
+        {post.description}
+      </p>
       <div className="mb-8 flex flex-col gap-3 border-b border-neutral-800 pb-5 text-sm text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <div className="flex items-center gap-2">

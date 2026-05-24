@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/navbar";
-import { absoluteUrl, site } from "@/lib/seo";
+import { absoluteUrl, ogImageUrl, site } from "@/lib/seo";
 import { Analytics } from "@vercel/analytics/next";
 
 const interSans = Inter({
@@ -28,9 +28,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: absoluteUrl(
-          `/api/og?title=${encodeURIComponent(site.name)}&description=${encodeURIComponent(site.description)}`,
-        ),
+        url: ogImageUrl(site.name, site.description),
         width: 1200,
         height: 630,
         alt: site.name,
@@ -42,11 +40,7 @@ export const metadata: Metadata = {
     title: site.name,
     description: site.description,
     creator: site.handle,
-    images: [
-      absoluteUrl(
-        `/api/og?title=${encodeURIComponent(site.name)}&description=${encodeURIComponent(site.description)}`,
-      ),
-    ],
+    images: [ogImageUrl(site.name, site.description)],
   },
 };
 

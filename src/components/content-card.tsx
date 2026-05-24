@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { withUtm } from "@/lib/utm";
 
 export interface ContentCardProps {
   title: string;
@@ -15,7 +16,7 @@ export default function ContentCard(content: ContentCardProps) {
     <div className="flex items-start justify-between gap-4 border-b border-neutral-800 py-5 last:border-0">
       <div className="flex flex-col gap-1">
         <Link
-          href={content.url}
+          href={isExternal ? withUtm(content.url) : content.url}
           target={isExternal ? "_blank" : undefined}
           rel={isExternal ? "noopener noreferrer" : undefined}
           className="text-sm font-medium text-neutral-50 underline underline-offset-4 hover:text-neutral-300"
