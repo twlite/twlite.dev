@@ -25,6 +25,33 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #262626;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #404040;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #262626 transparent;
+}
+
 .gallery-image-skeleton {
     @apply absolute inset-0 bg-neutral-900;
 }
@@ -51,7 +78,7 @@ body {
     @apply text-neutral-300;
 
     > * + * {
-        @apply mt-5;
+        @apply mt-3;
     }
 
     :where(h1, h2, h3, h4, h5, h6) {
@@ -104,7 +131,7 @@ body {
     }
 
     :where(ul, ol) {
-        @apply my-5 space-y-1.5 pl-5 text-sm leading-7 text-neutral-300;
+        @apply space-y-0.5 pl-5 text-sm leading-7 text-neutral-300;
     }
 
     ul {
@@ -128,23 +155,23 @@ body {
     }
 
     blockquote {
-        @apply my-7 border-l-2 border-neutral-600 bg-neutral-900/50 px-5 py-4 text-neutral-300;
+        @apply rounded-r-md border-l-[3px] border-neutral-500 bg-neutral-900/80 px-5 py-4 text-neutral-400;
     }
 
     blockquote p {
-        @apply my-0 text-sm leading-7 text-neutral-300;
+        @apply my-0 text-sm leading-7;
     }
 
     hr {
-        @apply my-10 border-0 border-t border-neutral-800;
+        @apply border-0 border-t border-neutral-800;
     }
 
     img {
-        @apply my-8 rounded-md border border-neutral-800 bg-neutral-900;
+        @apply rounded-md border border-neutral-800 bg-neutral-900;
     }
 
     table {
-        @apply my-0 w-full min-w-full border-collapse text-xs;
+        @apply w-full min-w-full border-collapse text-xs;
     }
 
     thead {
@@ -167,20 +194,32 @@ body {
         @apply rounded border border-neutral-800 bg-neutral-900 px-1.5 py-0.5 text-[0.9em] leading-normal text-neutral-100;
     }
 
+    figure {
+        @apply m-0;
+    }
+
     pre {
-        @apply !px-0 rounded-md border border-neutral-800 bg-neutral-950/90 shadow-sm;
+        @apply !px-0 !rounded-b-md border-x border-b border-neutral-800 bg-neutral-950/90 shadow-sm;
     }
 
     .code-block {
-        @apply relative;
+        @apply rounded-md;
+    }
+
+    .code-block-header {
+        @apply flex items-center justify-between rounded-t-md border border-neutral-800 bg-neutral-900/80 px-3 py-1.5;
+    }
+
+    .code-block-lang {
+        @apply inline-flex items-center gap-1.5 select-none text-[0.6875rem] font-medium uppercase tracking-wider text-neutral-400;
+    }
+
+    .code-block-lang-icon {
+        @apply size-3.5;
     }
 
     .code-block-copy {
-        @apply absolute right-2 top-2 z-10 rounded border border-neutral-700 bg-neutral-900/90 px-2 py-1 text-[0.6875rem] font-medium text-neutral-300 opacity-0 shadow-sm transition hover:border-neutral-500 hover:text-neutral-50 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500;
-    }
-
-    .code-block:hover .code-block-copy {
-        @apply opacity-100;
+        @apply z-10 inline-flex items-center gap-1.5 rounded border border-neutral-700 bg-neutral-900/90 px-2 py-1 text-[0.6875rem] font-medium text-neutral-400 shadow-sm transition hover:border-neutral-500 hover:text-neutral-50 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500;
     }
 
     code {
@@ -250,22 +289,12 @@ body {
         @apply rounded-t-md border border-b-0 border-neutral-800 bg-neutral-900 px-3 py-2 text-sm font-semibold text-neutral-200;
     }
 
-    figure[data-rehype-pretty-code-figure]:has(
-            > [data-rehype-pretty-code-title]
-        )
-        .code-block-copy {
-        @apply top-10;
+    [data-rehype-pretty-code-title] + .code-block .code-block-header {
+        @apply !rounded-t-none border-t-0;
     }
 
-    figure[data-rehype-pretty-code-figure]:has(
-            > [data-rehype-pretty-code-title]
-        )
-        pre {
-        @apply !rounded-t-none;
-    }
-
-    figure {
-        @apply my-7;
+    [data-rehype-pretty-code-title] + .code-block pre {
+        @apply !rounded-b-md;
     }
 
     pre,

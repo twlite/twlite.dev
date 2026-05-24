@@ -31,8 +31,7 @@ This is particularly beneficial for:
 
 Here's a canonical example:
 
-```javascript
-// app/utils/data.js
+```javascript title="app/utils/data.js"
 export async function getPokemonDetails(pokemonName) {
   'use cache'; // Instructs Next.js to cache the result of this function
 
@@ -80,8 +79,7 @@ pnpm add directive-to-hof
 
 Then, you'd create a transformer. This build-time script would find functions with `'use cache'` and wrap them:
 
-```javascript
-// build-transformer.js
+```javascript title="build-transformer.js"
 import { createDirectiveTransformer } from 'directive-to-hof';
 
 // This transformer will convert our 'use cache' directive into actual caching code
@@ -396,8 +394,7 @@ export function revalidateTag(tagToRevalidate) {
 
 Let's assemble all the pieces into the final `cache.js` file.
 
-```javascript
-// cache.js (Complete)
+```javascript title="cache.js"
 import { AsyncLocalStorage } from 'node:async_hooks';
 import crypto from 'node:crypto';
 
@@ -521,8 +518,7 @@ export function revalidateTag(tagToRevalidate) {
 
 Let's create an example file (`app.js`) that uses our caching system. This file would be the one processed by our hypothetical build transformer.
 
-```javascript
-// app.js (This is the file you'd "compile" or run after transformation)
+```javascript title="app.js"
 // For this example, we'll assume it's already transformed,
 // so we'll import cacheWrapper directly for testing.
 // In a real scenario with 'use cache', the transformer does this.
@@ -647,9 +643,8 @@ In a real Next.js project, you wouldn't manually wrap functions. The `'use cache
 
 1.  **Create a build script (`build-app.js`):**
 
-    ```javascript
-    // build-app.js
-    import { createDirectiveTransformer } from 'directive-to-hof';
+```javascript title="build-app.js"
+import { createDirectiveTransformer } from 'directive-to-hof';
     import { readFile, writeFile, mkdir } from 'node:fs/promises';
     import path from 'node:path';
 
@@ -688,9 +683,8 @@ In a real Next.js project, you wouldn't manually wrap functions. The `'use cache
 2.  **Create your source file with `'use cache'` (e.g., `src/app-source.js`):**
     This would be similar to `app.js` but with `_getPokemonData` actually containing `'use cache';` and not being manually wrapped. The `cacheWrapper` import would be handled by the transformer.
 
-    ```javascript
-    // src/app-source.js
-    // Note: For this to work with the build script, cache.js should be in the root,
+```javascript title="src/app-source.js"
+// Note: For this to work with the build script, cache.js should be in the root,
     // or importPath in build-app.js needs to be adjusted.
     // Let's assume cache.js is in the project root, and src/ is where app-source.js is.
     // Then importPath should be '../cache.js' as set in build-app.js.

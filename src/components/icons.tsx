@@ -117,6 +117,93 @@ export function CalendarIcon() {
   );
 }
 
+export function PowerShell({ color }: { color?: string }) {
+  return (
+    <svg
+      stroke={color ?? "currentColor"}
+      fill={color ?? "currentColor"}
+      strokeWidth="0"
+      viewBox="0 0 16 16"
+      className="size-4"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M2.5 1.007l12.999.17.43.501-1.82 12.872-.57.489-13-.17-.43-.502L1.93 1.495l.57-.488zM1.18 13.885l11.998.157 1.68-11.882L2.86 2.003 1.18 13.885zm5.791-3.49l-.14.991 5 .066.14-.99-5-.066zm1.71-2.457l-3.663-2.93-.692.796 2.636 2.112L3.739 9.95l.465.812L8.68 7.938z"
+      />
+    </svg>
+  );
+}
+
+export function Diff({ color }: { color?: string }) {
+  return (
+    <svg
+      stroke={color ?? "currentColor"}
+      fill={color ?? "currentColor"}
+      strokeWidth="0"
+      viewBox="0 0 16 16"
+      className="size-4"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M9.99994 12H4.99994V11H9.99994V12Z" />
+      <path d="M7.99994 6H9.99994V7H7.99994V9H6.99994V7H4.99994V6H6.99994V4H7.99994V6Z" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M10.7099 1.29004L13.7099 4.29004L13.9999 5V14L12.9999 15H2.99994L1.99994 14V2L2.99994 1H9.99994L10.7099 1.29004ZM2.99994 14H12.9999V5L9.99994 2H2.99994V14Z" />
+      <path d="M13.42 0.999756L15.71 3.28976L16 3.99976L16.0001 13.9998L15.0001 14.9998L15 3.99976L12 0.999756H13.42Z" />
+    </svg>
+  );
+}
+
+export function CopyIcon({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+export function CheckIcon({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+export function MarkdownIcon({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M3 7h4l2 3 2-3h4" />
+      <path d="M3 17V7" />
+      <path d="M15 17V7" />
+      <path d="M15 12h4l2 3 2-3h4" />
+      <path d="M21 17V7" />
+    </svg>
+  );
+}
+
+export function JsonIcon({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M8 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h2" />
+      <path d="M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-2" />
+      <path d="M12 8v8" />
+      <path d="M10 12h4" />
+    </svg>
+  );
+}
+
+export function RssIcon({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M4 11a9 9 0 0 1 9 9" />
+      <path d="M4 4a16 16 0 0 1 16 16" />
+      <circle cx="5" cy="19" r="1" />
+    </svg>
+  );
+}
+
 export function ClockIcon() {
   return (
     <svg

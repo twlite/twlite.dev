@@ -86,11 +86,16 @@ export function readPhotographs({
       const slug = path.basename(fileName, path.extname(fileName));
       const dimensions = readImageDimensions(filePath);
 
+      const ext = path.extname(fileName).toLowerCase();
+      const webpFileName = ext === ".jpg" || ext === ".jpeg"
+        ? path.basename(fileName, ext) + ".webp"
+        : fileName;
+
       return {
         slug,
         title: titleFromFileName(fileName),
-        src: `/photographs/${fileName}`,
-        fileName,
+        src: `/photographs/${webpFileName}`,
+        fileName: webpFileName,
         width: dimensions?.width || 1,
         height: dimensions?.height || 1,
         size: stats.size,

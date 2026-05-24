@@ -15,6 +15,7 @@ export default function Navbar() {
           alt="profile"
           className="size-8 rounded-full"
           loading="eager"
+          fetchPriority="high"
         />
       </Link>
 

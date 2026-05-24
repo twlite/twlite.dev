@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import { SafeTweet } from "./tweet-wrapper";
 import rehypePrettyCode, { Options } from "rehype-pretty-code";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
@@ -95,6 +96,7 @@ const components = {
       className="px-3 py-2 text-sm text-foreground border border-border"
     />
   ),
+  Tweet: SafeTweet,
 };
 
 interface MDXContentProps {

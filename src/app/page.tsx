@@ -57,22 +57,20 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="space-y-2">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold text-neutral-100">
-                Featured Song
-              </h2>
-            </div>
+          <section className="space-y-3">
+            <h2 className="text-sm font-semibold text-neutral-100">
+              Featured Song
+            </h2>
             <p>
-              Currently keeping{" "}
+              I have been listening to{" "}
               <ContentLink
                 url="https://music.youtube.com/watch?v=PgI2n7hTuXs"
                 name="Bachau by Albatross"
               />{" "}
-              close by. Albatross is my favorite band, and their songs are part
-              of my everyday listening.
+              on repeat — Albatross is my favorite band, and their sound has
+              been a constant in my everyday listening.
             </p>
-            <div className="overflow-hidden rounded-md border border-neutral-800 bg-neutral-900">
+            <div className="overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900">
               <iframe
                 className="aspect-video w-full"
                 src="https://www.youtube.com/embed/PgI2n7hTuXs"
@@ -81,9 +79,17 @@ export default function Home() {
                 referrerPolicy="strict-origin-when-cross-origin"
                 allowFullScreen
               />
-              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-neutral-800 px-3 py-2 text-xs text-neutral-500">
-                <span>Bachau · Albatross</span>
-                <span>#EverydayListen</span>
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-neutral-800 px-3 py-2.5 text-xs text-neutral-500">
+                <span className="font-medium text-neutral-300">
+                  Bachau · Albatross
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="rounded bg-neutral-800 px-1.5 py-0.5 text-neutral-400">
+                    Nepali Rock
+                  </span>
+                  <span>2024</span>
+                  <span>#EverydayListen</span>
+                </div>
               </div>
             </div>
           </section>

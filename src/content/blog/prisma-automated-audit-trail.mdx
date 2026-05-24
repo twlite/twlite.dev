@@ -37,8 +37,7 @@ Our solution eliminates these issues by centralizing the audit logic in Prisma m
 
 First, let's define our audit trail structure:
 
-```ts
-// types/audit.ts
+```ts title="types/audit.ts"
 export interface AuditTrailEntry {
   id: string;
   tableName: string;
@@ -70,8 +69,7 @@ export interface AuditConfig {
 
 Next, we'll create a context manager for storing user information:
 
-```ts
-// lib/audit-context.ts
+```ts title="lib/audit-context.ts"
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 interface AuditContext {
@@ -124,8 +122,7 @@ export class AuditContextManager {
 
 Now let's build the service that handles audit trail creation:
 
-```ts
-// lib/audit-service.ts
+```ts title="lib/audit-service.ts"
 import { PrismaClient } from '@prisma/client';
 import { AuditTrailEntry, AuditConfig, UserContext } from '../types/audit';
 
@@ -237,8 +234,7 @@ export class AuditService {
 
 The core of our solution is Prisma middleware that automatically intercepts all operations:
 
-```ts
-// lib/prisma-audit-middleware.ts
+```ts title="lib/prisma-audit-middleware.ts"
 import { PrismaClient } from '@prisma/client';
 import { AuditService } from './audit-service';
 import { AuditContextManager } from './audit-context';
@@ -322,8 +318,7 @@ export function createAuditMiddleware(auditService: AuditService) {
 
 Now let's configure our Prisma client with the audit middleware:
 
-```ts
-// lib/prisma.ts
+```ts title="lib/prisma.ts"
 import { PrismaClient } from '@prisma/client';
 import { AuditService } from './audit-service';
 import { createAuditMiddleware } from './prisma-audit-middleware';
@@ -362,8 +357,7 @@ export { auditService };
 
 To capture user context in your Express.js or Next.js application:
 
-```ts
-// middleware/auth-context.ts
+```ts title="middleware/auth-context.ts"
 import { Request, Response, NextFunction } from 'express';
 import { AuditContextManager } from '../lib/audit-context';
 
@@ -445,8 +439,7 @@ app.get('/audit/:tableName/:recordId', async (req, res) => {
 
 You'll need to add an audit trail table to your Prisma schema:
 
-```prisma
-// prisma/schema.prisma
+```prisma title="prisma/schema.prisma"
 model AuditTrail {
   id          String   @id @default(cuid())
   tableName   String
@@ -500,8 +493,7 @@ const auditConfig: AuditConfig = {
 
 ## Environment-based Configuration
 
-```ts
-// config/audit.ts
+```ts title="config/audit.ts"
 export const getAuditConfig = (): AuditConfig => {
   const isProduction = process.env.NODE_ENV === 'production';
   
@@ -529,8 +521,7 @@ export const getAuditConfig = (): AuditConfig => {
 
 For bulk operations, you might want to batch audit entries:
 
-```ts
-// lib/batch-audit-service.ts
+```ts title="lib/batch-audit-service.ts"
 export class BatchAuditService extends AuditService {
   private batchQueue: Array<() => Promise<void>> = [];
   private batchTimeout: NodeJS.Timeout | null = null;
@@ -566,8 +557,7 @@ export class BatchAuditService extends AuditService {
 
 Implement automatic cleanup of old audit entries:
 
-```ts
-// lib/audit-cleanup.ts
+```ts title="lib/audit-cleanup.ts"
 export class AuditCleanupService {
   constructor(private prisma: PrismaClient) {}
 
@@ -608,8 +598,7 @@ export class AuditCleanupService {
 
 Add analytics capabilities to your audit trail:
 
-```ts
-// lib/audit-analytics.ts
+```ts title="lib/audit-analytics.ts"
 export class AuditAnalyticsService {
   constructor(private prisma: PrismaClient) {}
 
@@ -682,8 +671,7 @@ export class AuditAnalyticsService {
 
 ## Unit Tests
 
-```ts
-// tests/audit-service.test.ts
+```ts title="tests/audit-service.test.ts"
 import { AuditService } from '../lib/audit-service';
 import { AuditContextManager } from '../lib/audit-context';
 
@@ -754,8 +742,7 @@ describe('AuditService', () => {
 
 ## Integration Tests
 
-```ts
-// tests/audit-integration.test.ts
+```ts title="tests/audit-integration.test.ts"
 describe('Audit Trail Integration', () => {
   it('should automatically log user creation', async () => {
     const user = await prisma.user.create({
@@ -836,8 +823,7 @@ FOR VALUES FROM ('2024-02-01') TO ('2024-03-01');
 
 For better performance, consider processing audit entries asynchronously:
 
-```ts
-// lib/async-audit-service.ts
+```ts title="lib/async-audit-service.ts"
 export class AsyncAuditService extends AuditService {
   async logOperation(params: any): Promise<void> {
     // Don't await - fire and forget

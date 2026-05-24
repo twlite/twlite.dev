@@ -4,6 +4,23 @@
 import type { PostSummary } from "@/lib/post-summaries";
 
 export const postSummariesBySlug: Record<string, PostSummary> = {
+  "I-added-sfw-to-my-package-manager-commands-after-the-recent-npm-supply-chain-mess": {
+    "slug": "I-added-sfw-to-my-package-manager-commands-after-the-recent-npm-supply-chain-mess",
+    "title": "I added `sfw` to my package manager commands after the recent npm supply chain mess",
+    "date": "2026-05-24",
+    "description": "A small setup I added after recent npm supply chain attacks made me realize how casually we execute untrusted install-time code on our machines.",
+    "readingTime": "4",
+    "tags": [
+      "npm",
+      "supply-chain-security",
+      "cybersecurity",
+      "package-managers",
+      "socket-firewall",
+      "socket.dev",
+      "javascript",
+      "nodejs"
+    ]
+  },
   "bitfields-permissions-feature-flags": {
     "slug": "bitfields-permissions-feature-flags",
     "title": "Using Bitfields for Permissions and Feature Flags",
@@ -51,39 +68,13 @@ export const postSummariesBySlug: Record<string, PostSummary> = {
       "tutorial"
     ]
   },
-  "typescript-tips": {
-    "slug": "typescript-tips",
-    "title": "Essential TypeScript Tips for Better Code",
-    "date": "2023-03-20",
-    "description": "Improve your TypeScript skills with these practical tips and best practices for writing cleaner, more maintainable code.",
-    "readingTime": "2",
-    "tags": []
-  },
-  "building-with-nextjs": {
-    "slug": "building-with-nextjs",
-    "title": "Building Modern Websites with Next.js",
-    "date": "2023-02-15",
-    "description": "Explore the benefits of using Next.js for your web projects and learn how to get started with this powerful React framework.",
-    "readingTime": "2",
-    "tags": []
-  },
-  "hello-world": {
-    "slug": "hello-world",
-    "title": "Hello World - My First Blog Post",
-    "date": "2023-01-01",
-    "description": "Welcome to my blog! In this first post, I'll introduce myself and share what you can expect from my future articles.",
-    "readingTime": "1",
-    "tags": []
-  },
 };
 
 export const allPostSummaries: PostSummary[] = [
+  postSummariesBySlug["I-added-sfw-to-my-package-manager-commands-after-the-recent-npm-supply-chain-mess"],
   postSummariesBySlug["bitfields-permissions-feature-flags"],
   postSummariesBySlug["collaborative-filtering-recommendation-systems"],
   postSummariesBySlug["implementing-nextjs-after-function"],
   postSummariesBySlug["prisma-automated-audit-trail"],
   postSummariesBySlug["how-does-nextjs-use-cache-work"],
-  postSummariesBySlug["typescript-tips"],
-  postSummariesBySlug["building-with-nextjs"],
-  postSummariesBySlug["hello-world"],
 ];

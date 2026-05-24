@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getAllPhotographs } from "@/lib/photographs";
 import { getAllPostSummaries } from "@/lib/post-summaries";
 import { absoluteUrl } from "@/lib/seo";
 
@@ -43,5 +44,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...blogRoutes];
+  const galleryRoutes = getAllPhotographs().map((photo) => ({
+    url: absoluteUrl(`/gallery/${photo.slug}`),
+    lastModified: new Date(photo.updatedAt),
+    changeFrequency: "monthly" as const,
+    priority: 0.5,
+  }));
+
+  return [...staticRoutes, ...blogRoutes, ...galleryRoutes];
 }

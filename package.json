@@ -10,6 +10,7 @@
     "photos:erase-metadata": "node scripts/erase-metadata.mjs"
   },
   "dependencies": {
+    "@icons-pack/react-simple-icons": "^13.13.0",
     "@next/mdx": "^16.2.6",
     "@vercel/analytics": "^2.0.1",
     "gray-matter": "^4.0.3",
@@ -18,6 +19,7 @@
     "next-mdx-remote": "^6.0.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-tweet": "^3.3.0",
     "reading-time": "^1.5.0",
     "rehype-pretty-code": "^0.14.3",
     "rehype-slug": "^6.0.0",

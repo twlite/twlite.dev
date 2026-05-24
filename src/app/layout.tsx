@@ -57,6 +57,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preload" as="image" href="https://github.com/twlite.png" />
+      </head>
       <body
         className={`${interSans.className} antialiased bg-neutral-950 text-neutral-50 min-h-screen dark`}
       >

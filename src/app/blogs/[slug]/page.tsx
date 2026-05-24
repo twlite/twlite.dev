@@ -5,7 +5,7 @@ import { getPostBySlug, getAllPosts } from "@/lib/posts";
 import { MDXContent } from "@/components/blogs/mdx-components";
 import { CalendarIcon, ClockIcon } from "@/components/icons";
 import { use } from "react";
-import CopyMarkdownButton from "@/components/blogs/copy-markdown-button";
+import BlogToolbar from "@/components/blogs/blog-toolbar";
 import { absoluteUrl, createPageMetadata, site } from "@/lib/seo";
 
 export const dynamicParams = false;
@@ -92,7 +92,7 @@ export default function BlogContentPage({
             {post.readingTime} min read
           </div>
         </div>
-        <CopyMarkdownButton content={post.content} />
+        <BlogToolbar content={post.content} slug={post.slug} />
       </div>
 
       <MDXContent source={post.content} />

@@ -1,0 +1,152 @@
+---
+title: 'I added `sfw` to my package manager commands after the recent npm supply chain mess'
+date: '2026-05-24'
+description: 'A small setup I added after recent npm supply chain attacks made me realize how casually we execute untrusted install-time code on our machines.'
+tags:
+  - npm
+  - supply-chain-security
+  - cybersecurity
+  - package-managers
+  - socket-firewall
+  - socket.dev
+  - javascript
+  - nodejs
+---
+
+A few days ago I saw a [tweet](https://x.com/sebastienlorber/status/2057733567484953019?utm_source=twlite.dev) from [Sébastien Lorber](https://x.com/sebastienlorber?utm_source=twlite.dev) talking about [Socket Firewall](https://socket.dev/blog/introducing-socket-firewall?utm_source=twlite.dev) and honestly it made me rethink how casually I run package manager commands on my machine.
+
+<Tweet id="2057733567484953019" />
+
+Most of us type stuff like this without thinking:
+
+```bash
+npm install
+pnpm install
+npx something
+bun install
+```
+
+But the reality is that these commands are executing code from the internet directly on your machine.
+
+Not later. Not after review. Immediately.
+
+And recently, attackers have been abusing that pretty aggressively.
+
+The latest wave, called ["Mini Shai-Hulud"](https://www.techradar.com/pro/security/mini-shai-halud-hackers-publish-over-600-compromised-npm-packages-developers-warned-to-be-on-their-guard?utm_source=twlite.dev), compromised hundreds of npm packages, including packages connected to ecosystems like TanStack, Mistral, OpenSearch, UiPath, and others. Some of these packages are downloaded millions of times.
+
+This wasn't just random crypto-miner garbage either.
+
+The malware was specifically targeting developer environments:
+
+- GitHub tokens
+- SSH keys
+- cloud credentials
+- CI/CD secrets
+- npm auth tokens
+
+Basically the exact stuff that can turn one compromised laptop into a much larger breach, [as reported by TechRadar](https://www.techradar.com/pro/security/openai-confirms-security-breach-in-tanstack-supply-chain-attack-but-says-no-user-data-was-affected?utm_source=twlite.dev).
+
+Some attacks reportedly spread through postinstall hooks and poisoned package updates. Others abused trusted publishing workflows and maintainer credentials, [per upwind.io](https://www.upwind.io/feed/mini-shai-hulud-targets-sap-npm-packages-ci-cd-publishing-pipeline-abused-in-supply-chain-attack?utm_source=twlite.dev).
+
+The scary part is that many of these packages were legitimate trusted packages before being compromised. Not fake typo packages. Not obvious malware. Actual real dependencies people already used in production.
+
+TanStack itself published a [postmortem](https://tanstack.com/blog/npm-supply-chain-compromise-postmortem?utm_source=twlite.dev) after one of the compromises.
+
+So I ended up doing something very small but honestly pretty reasonable:
+
+I wrapped my package manager commands through `sfw`.
+
+Instead of:
+
+```bash
+npm install
+```
+
+I now effectively run:
+
+```bash
+sfw npm install
+```
+
+Same for:
+
+- npx
+- pnpm
+- pnpx
+- yarn
+- bun
+- bunx
+
+On macOS/Linux I added this to my shell config:
+
+```bash title="Shell config (.bashrc/.zshrc)"
+wrap_sfw() {
+  if command -v sfw >/dev/null 2>&1; then
+    sfw "$1" "${@:2}"
+  else
+    "$@"
+  fi
+}
+
+npm()  { wrap_sfw npm  "$@"; }
+npx()  { wrap_sfw npx  "$@"; }
+pnpm() { wrap_sfw pnpm "$@"; }
+pnpx() { wrap_sfw pnpx "$@"; }
+yarn() { wrap_sfw yarn "$@"; }
+bun()  { wrap_sfw bun  "$@"; }
+bunx() { wrap_sfw bunx "$@"; }
+```
+
+And on PowerShell:
+
+```powershell title="PowerShell profile ($PROFILE)"
+$SfwCommands = @("npm", "npx", "pnpm", "pnpx", "yarn", "bun", "bunx")
+
+function Invoke-SfwOrNative {
+    param(
+        [string] $CommandName,
+        [object[]] $CommandArgs
+    )
+
+    $sfw = Get-Command sfw -ErrorAction SilentlyContinue
+
+    if ($sfw) {
+        & sfw $CommandName @CommandArgs
+        return
+    }
+
+    $native = Get-Command $CommandName -CommandType Application, ExternalScript -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+
+    & $native.Source @CommandArgs
+}
+
+foreach ($cmd in $SfwCommands) {
+    Set-Item "function:$cmd" {
+        Invoke-SfwOrNative $MyInvocation.MyCommand.Name $args
+    }
+}
+```
+
+The nice thing about doing it this way is:
+
+- if `sfw` exists, commands go through it
+- if not, everything still works normally
+
+No muscle memory changes.
+
+I don't think this magically solves supply chain attacks. If a package is compromised badly enough and you explicitly allow it, you're still cooked.
+
+But I do think the industry has been way too trusting about install-time code execution for years. We normalized running arbitrary scripts from random transitive dependencies because it was convenient. Now we're seeing the consequences of that at scale.
+
+And honestly, I think this is only the beginning. Especially with AI-generated code becoming more common, people are installing dependencies faster and thinking about them less, [according to an arXiv paper](https://arxiv.org/abs/2605.17062?utm_source=twlite.dev).
+
+A few years ago, reviewing dependencies was already rare. Now half the internet is copy-pasting
+
+```bash
+npm install <package-name>
+```
+
+directly from AI chats, blogs, tweets, or generated README files.
+
+That combination is dangerous. I'm not trying to be paranoid about open source here. I love open source. Most of my work depends on it. But I think developers should start treating package installation with the same caution they treat running random shell scripts from the internet. Because realistically, they are almost the same thing.
