@@ -1,0 +1,118 @@
+---
+title: 'Why I Built @neplex/vectorizer'
+date: '2026-05-25'
+description: 'I needed to convert raster images to SVG programmatically. No existing Node.js library did exactly what I wanted, so I wrote one on top of VTracer using napi-rs.'
+tags:
+  - open-source
+  - rust
+  - nodejs
+  - napi-rs
+  - svg
+---
+
+At some point I needed to convert raster images to SVG as part of a project. My go-to at the time was [vectorizer.ai](https://vectorizer.ai/?utm_source=twlite.dev). It produces clean output, but it is a third-party web service. There is no way to automate it reliably, and piping images through an external API just to get an SVG felt wrong for something that should be a local operation.
+
+So I looked for a Node.js library. I found a couple of npm packages that wrapped existing tracers, but none of them exposed the configuration surface I needed. Parameters like corner threshold, speckle filtering, or path simplification mode were either hardcoded or missing entirely. They worked for the simplest cases but fell apart as soon as the input got more complex.
+
+I eventually came across [VTracer](https://github.com/visioncortex/vtracer?utm_source=twlite.dev) by visioncortex. It is a Rust library with a solid algorithm and a proper set of tunable parameters. The only thing missing was a good Node.js binding.
+
+I decided to write one using [napi-rs](https://napi.rs?utm_source=twlite.dev). The result is `@neplex/vectorizer`.
+
+## Installation
+
+```bash
+npm install @neplex/vectorizer
+```
+
+Or test it without installing:
+
+```bash
+npx @neplex/vectorizer ./input.png ./output.svg
+```
+
+## Basic usage
+
+```js
+import { vectorize, ColorMode, Hierarchical, PathSimplifyMode } from '@neplex/vectorizer';
+import { readFile, writeFile } from 'node:fs/promises';
+
+const src = await readFile('./logo.png');
+const svg = await vectorize(src);
+
+await writeFile('./logo.svg', svg);
+```
+
+That is all you need for a basic conversion. The default configuration works well for most images. If you need more control over the output, every parameter is configurable.
+
+## Configuration
+
+```js
+const svg = await vectorize(src, {
+  colorMode: ColorMode.Color,
+  colorPrecision: 6,
+  filterSpeckle: 4,
+  spliceThreshold: 45,
+  cornerThreshold: 60,
+  hierarchical: Hierarchical.Stacked,
+  mode: PathSimplifyMode.Spline,
+  layerDifference: 5,
+  lengthThreshold: 5,
+  maxIterations: 2,
+  pathPrecision: 5,
+});
+```
+
+Here is what each parameter does:
+
+- **`colorMode`** — `ColorMode.Color` traces the image in full color. `ColorMode.Binary` reduces everything to black and white, which is useful for logos or line art.
+- **`colorPrecision`** — Controls how many colors the tracer groups together. Higher values preserve more color detail; lower values simplify the palette and produce cleaner, smaller SVGs.
+- **`filterSpeckle`** — Ignores small noise patches below a certain pixel size. If your output has a lot of tiny stray shapes that should not be there, increase this value.
+- **`spliceThreshold`** — Controls how aggressively long curves are split into smaller segments. Lower values produce smoother paths; higher values produce fewer, rougher segments.
+- **`cornerThreshold`** — The angle (in degrees) below which a point is treated as a corner rather than a smooth curve. Lower values produce more corners; higher values produce smoother shapes.
+- **`hierarchical`** — `Hierarchical.Stacked` layers shapes on top of each other, similar to how a real illustration is built. `Hierarchical.Cutout` cuts shapes out of each other instead.
+- **`mode`** — The path simplification algorithm. `PathSimplifyMode.Spline` produces smooth curves and generally the best-looking output. `PathSimplifyMode.Polygon` uses straight lines only. `PathSimplifyMode.None` applies no simplification.
+- **`layerDifference`** — The minimum color difference between adjacent layers before they are merged. Higher values reduce the number of layers in the output.
+- **`lengthThreshold`** — Paths shorter than this value are discarded. Useful for cleaning up fine detail that would not be visible at normal sizes.
+- **`maxIterations`** — How many times the tracer refines its path approximation. More iterations produce more accurate paths at the cost of speed.
+- **`pathPrecision`** — The number of decimal places in the SVG path coordinates. Lower values produce smaller files; higher values preserve more geometric accuracy.
+
+## The four APIs
+
+The library exposes four functions depending on what you need:
+
+**`vectorize(buffer, config?)`** runs the conversion asynchronously. Takes an image buffer (PNG, JPEG, etc.) and returns a promise. Use this in servers or anywhere you cannot afford to block.
+
+**`vectorizeSync(buffer, config?)`** is the synchronous version. Fine for build scripts or one-off CLI tools where blocking does not matter.
+
+**`vectorizeRaw(buffer, rawConfig, config?)`** is async but accepts raw pixel data instead of an encoded image. If you are already working with pixel buffers from something like `sharp`, this skips the decoding step entirely.
+
+**`vectorizeRawSync(buffer, rawConfig, config?)`** is the synchronous version of the raw path.
+
+The async variants run on NAPI's native thread pool via the `AsyncTask` trait, not `spawn_blocking`. That means heavy conversions do not block the event loop while still returning results through a normal promise.
+
+## Performance
+
+On an i7-14700K, `@neplex/vectorizer` averages around **543 µs per image**. The closest pure-JS alternative, `imagetracerjs`, comes in at around **2.54 ms**, which is about 4.67x slower. For a single image the difference is imperceptible, but at scale it adds up.
+
+```ts
+clk: ~5.11 GHz
+cpu: Intel(R) Core(TM) i7-14700K
+runtime: node 22.12.0 (x64-win32)
+
+benchmark                   avg (min … max) p75   p99    (min … top 1%)
+------------------------------------------- -------------------------------
+@neplex/vectorizer           543.89 µs/iter 542.50 µs  ▆█
+                    (517.20 µs … 778.50 µs) 719.00 µs ▃██▅▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+imagetracerjs                  2.54 ms/iter   2.61 ms  ▃█▃▂▄
+                        (2.38 ms … 4.09 ms)   2.93 ms ██████████▄▅▄▅▂▂▁▁▁▂▁
+
+summary
+  @neplex/vectorizer
+   4.67x faster than imagetracerjs
+```
+
+## Why I published it
+
+I built it because I needed it and nothing else fit. Publishing it made sense because the gap clearly existed: a flexible, properly async, napi-rs-based VTracer binding for Node.js. Someone else would eventually hit the same wall.
+
+Source is on [GitHub](https://github.com/neplextech/vectorizer?utm_source=twlite.dev).
