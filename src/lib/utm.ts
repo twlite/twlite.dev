@@ -2,7 +2,13 @@ const utmSource = "twlite.dev";
 const utmMedium = "referral";
 
 export function withUtm(url: string): string {
-  if (!url.startsWith("http")) return url;
-  const separator = url.includes("?") ? "&" : "?";
-  return `${url}${separator}utm_source=${utmSource}&utm_medium=${utmMedium}`;
+  try {
+    if (!url.startsWith("http")) return url;
+    const parsed = new URL(url);
+    if (!parsed.searchParams.has("utm_source")) parsed.searchParams.set("utm_source", utmSource);
+    if (!parsed.searchParams.has("utm_medium")) parsed.searchParams.set("utm_medium", utmMedium);
+    return parsed.toString();
+  } catch {
+    return url;
+  }
 }
