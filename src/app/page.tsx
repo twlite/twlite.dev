@@ -57,7 +57,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="space-y-3">
+          {/* <section className="space-y-3">
             <h2 className="text-sm font-semibold text-neutral-100">
               Featured Song
             </h2>
@@ -88,7 +88,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </section>
+          </section> */}
         </div>
       </Shell>
       <Footer />
