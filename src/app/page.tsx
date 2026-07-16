@@ -23,6 +23,29 @@ export default function Home() {
             infrastructure.
           </p>
 
+          <div className="rounded-lg border border-neutral-700 bg-neutral-900/70 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-medium text-neutral-100">
+                  Have something to discuss?
+                </p>
+                <p className="mt-0.5 text-xs leading-5 text-neutral-400">
+                  Schedule a call about developer tooling, open source, Neplex,
+                  or potential collaborations.
+                </p>
+              </div>
+
+              <a
+                href="https://cal.com/twlite"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex shrink-0 items-center justify-center rounded-md bg-neutral-100 px-4 py-2 text-xs font-semibold text-neutral-950 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+              >
+                Book a call
+              </a>
+            </div>
+          </div>
+
           <section className="space-y-2">
             <h2 className="text-sm font-semibold text-neutral-100">Work</h2>
             <p>
