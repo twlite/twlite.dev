@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { socialLinks } from "@/lib/socials";
+import Link from 'next/link';
+import { socialLinks } from '@/lib/socials';
 import {
   Discord,
   Email,
@@ -9,7 +9,7 @@ import {
   Patreon,
   TikTok,
   Twitter,
-} from "../icons";
+} from '../icons';
 
 const iconMap: Record<string, React.ReactNode> = {
   github: <GitHub />,
@@ -51,6 +51,7 @@ function SocialLink({
       href={url}
       className="inline-flex items-center gap-1 font-medium text-xs transition-colors hover:text-neutral-200"
       rel="noreferrer noopener"
+      target="_blank"
     >
       {icon} {name}
     </Link>
