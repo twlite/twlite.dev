@@ -4,13 +4,13 @@
 import type { Photograph } from "@/lib/photographs";
 
 export const allPhotographs: Photograph[] = [
-  {"slug":"fog","title":"Fog","src":"/photographs/fog.webp","fileName":"fog.webp","width":1,"height":1,"size":643856,"updatedAt":"2026-05-24T12:33:12.393Z"},
-  {"slug":"khwopa-01","title":"Khwopa 01","src":"/photographs/khwopa-01.webp","fileName":"khwopa-01.webp","width":1,"height":1,"size":1032660,"updatedAt":"2026-05-24T12:33:13.132Z"},
-  {"slug":"khwopa-02","title":"Khwopa 02","src":"/photographs/khwopa-02.webp","fileName":"khwopa-02.webp","width":1,"height":1,"size":1043428,"updatedAt":"2026-05-24T12:33:13.852Z"},
-  {"slug":"macro","title":"Macro","src":"/photographs/macro.webp","fileName":"macro.webp","width":1,"height":1,"size":841024,"updatedAt":"2026-05-24T12:33:14.585Z"},
-  {"slug":"marbal-dada-01","title":"Marbal Dada 01","src":"/photographs/marbal-dada-01.webp","fileName":"marbal-dada-01.webp","width":1,"height":1,"size":1498520,"updatedAt":"2026-05-24T12:33:15.375Z"},
-  {"slug":"marbal-dada-02","title":"Marbal Dada 02","src":"/photographs/marbal-dada-02.webp","fileName":"marbal-dada-02.webp","width":1,"height":1,"size":1223216,"updatedAt":"2026-05-24T12:33:16.128Z"},
-  {"slug":"moon","title":"Moon","src":"/photographs/moon.webp","fileName":"moon.webp","width":1,"height":1,"size":64754,"updatedAt":"2026-05-24T12:33:16.600Z"},
-  {"slug":"night-sky","title":"Night Sky","src":"/photographs/night-sky.webp","fileName":"night-sky.webp","width":1,"height":1,"size":121076,"updatedAt":"2026-05-24T12:33:17.108Z"},
-  {"slug":"sunset","title":"Sunset","src":"/photographs/sunset.webp","fileName":"sunset.webp","width":1,"height":1,"size":296910,"updatedAt":"2026-05-24T12:33:17.680Z"},
+  {"slug":"fog","title":"Fog","src":"/photographs/fog.webp","fileName":"fog.webp","width":1,"height":1,"size":766750,"updatedAt":"2026-07-18T19:24:34.014Z"},
+  {"slug":"khwopa-01","title":"Khwopa 01","src":"/photographs/khwopa-01.webp","fileName":"khwopa-01.webp","width":1,"height":1,"size":1231508,"updatedAt":"2026-07-18T19:24:34.656Z"},
+  {"slug":"khwopa-02","title":"Khwopa 02","src":"/photographs/khwopa-02.webp","fileName":"khwopa-02.webp","width":1,"height":1,"size":1278810,"updatedAt":"2026-07-18T19:24:35.272Z"},
+  {"slug":"macro","title":"Macro","src":"/photographs/macro.webp","fileName":"macro.webp","width":1,"height":1,"size":1105680,"updatedAt":"2026-07-18T19:24:35.941Z"},
+  {"slug":"marbal-dada-01","title":"Marbal Dada 01","src":"/photographs/marbal-dada-01.webp","fileName":"marbal-dada-01.webp","width":1,"height":1,"size":1798382,"updatedAt":"2026-07-18T19:24:36.635Z"},
+  {"slug":"marbal-dada-02","title":"Marbal Dada 02","src":"/photographs/marbal-dada-02.webp","fileName":"marbal-dada-02.webp","width":1,"height":1,"size":1456080,"updatedAt":"2026-07-18T19:24:37.286Z"},
+  {"slug":"moon","title":"Moon","src":"/photographs/moon.webp","fileName":"moon.webp","width":1,"height":1,"size":71470,"updatedAt":"2026-07-18T19:24:37.616Z"},
+  {"slug":"night-sky","title":"Night Sky","src":"/photographs/night-sky.webp","fileName":"night-sky.webp","width":1,"height":1,"size":147950,"updatedAt":"2026-07-18T19:24:37.964Z"},
+  {"slug":"sunset","title":"Sunset","src":"/photographs/sunset.webp","fileName":"sunset.webp","width":1,"height":1,"size":378300,"updatedAt":"2026-07-18T19:24:38.425Z"},
 ];

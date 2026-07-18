@@ -4,6 +4,28 @@
 import type { PostSummary } from "@/lib/post-summaries";
 
 export const postSummariesBySlug: Record<string, PostSummary> = {
+  "what-i-was-actually-chasing": {
+    "slug": "what-i-was-actually-chasing",
+    "title": "It Was Never About the Title",
+    "date": "2026-07-19",
+    "description": "It took me years to understand why building free side projects felt more rewarding than paid work. This is what I learned.",
+    "readingTime": "5",
+    "tags": []
+  },
+  "why-i-built-neplex-vectorizer": {
+    "slug": "why-i-built-neplex-vectorizer",
+    "title": "Why I Built @neplex/vectorizer",
+    "date": "2026-05-25",
+    "description": "I needed to convert raster images to SVG programmatically. No existing Node.js library did exactly what I wanted, so I wrote one on top of VTracer using napi-rs.",
+    "readingTime": "5",
+    "tags": [
+      "open-source",
+      "rust",
+      "nodejs",
+      "napi-rs",
+      "svg"
+    ]
+  },
   "I-added-sfw-to-my-package-manager-commands-after-the-recent-npm-supply-chain-mess": {
     "slug": "I-added-sfw-to-my-package-manager-commands-after-the-recent-npm-supply-chain-mess",
     "title": "I added `sfw` to my package manager commands after the recent npm supply chain mess",
@@ -71,6 +93,8 @@ export const postSummariesBySlug: Record<string, PostSummary> = {
 };
 
 export const allPostSummaries: PostSummary[] = [
+  postSummariesBySlug["what-i-was-actually-chasing"],
+  postSummariesBySlug["why-i-built-neplex-vectorizer"],
   postSummariesBySlug["I-added-sfw-to-my-package-manager-commands-after-the-recent-npm-supply-chain-mess"],
   postSummariesBySlug["bitfields-permissions-feature-flags"],
   postSummariesBySlug["collaborative-filtering-recommendation-systems"],
