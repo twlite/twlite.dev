@@ -57,7 +57,7 @@ export default function Home() {
             <p>
               I also write occasionally, usually about software, open source, or
               some topic I wanted to think through in writing. You can read
-              those posts on the <ContentLink url="/blog" name="blog" />.
+              those posts on the <ContentLink url="/blogs" name="blogs page" />.
             </p>
           </section>
 
