@@ -35,6 +35,12 @@ export const projects: ContentCardProps[] = [
     description: "Fast Node.js library to convert raster images to svg",
   },
   {
+    title: "redactive",
+    url: "https://github.com/neplextech/redactive",
+    image: null,
+    description: "Fast, configurable sensitive-data redaction for JavaScript and TypeScript.",
+  },
+  {
     title: "ecmacraft",
     url: "https://github.com/twlite/ecmacraft",
     image: null,
