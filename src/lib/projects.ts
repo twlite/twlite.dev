@@ -29,16 +29,34 @@ export const projects: ContentCardProps[] = [
       "Discord Player is a robust framework for developing Discord Music bots using JavaScript and TypeScript.",
   },
   {
+    title: "OPPA",
+    url: "https://oppa.neplex.dev",
+    image: null,
+    description: "Open Printer Proxy Agent (OPPA) for reliable cloud-to-local printing.",
+  },
+  {
     title: "@neplex/vectorizer",
     url: "https://github.com/neplextech/vectorizer",
     image: null,
     description: "Fast Node.js library to convert raster images to svg",
   },
   {
+    title: "Payments SDK",
+    url: "https://payments.neplex.dev",
+    image: null,
+    description: "Unified payments sdk for JavaScript/TypeScript.",
+  },
+  {
     title: "redactive",
     url: "https://github.com/neplextech/redactive",
     image: null,
     description: "Fast, configurable sensitive-data redaction for JavaScript and TypeScript.",
+  },
+  {
+    title: "policymaker",
+    url: "https://github.com/neplextech/policymaker",
+    image: null,
+    description: "Fast, type-safe authorization policies for JavaScript and TypeScript.",
   },
   {
     title: "ecmacraft",
