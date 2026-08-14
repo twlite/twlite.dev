@@ -22,6 +22,18 @@ export const projects: ContentCardProps[] = [
     description: "Robust cross-platform webview library for Node/Deno/Bun",
   },
   {
+    title: "OPPA",
+    url: "https://oppa.neplex.dev",
+    image: "https://oppa.neplex.dev/icon.png",
+    description: "Open Printer Proxy Agent (OPPA) for reliable cloud-to-local printing.",
+  },
+  {
+    title: "Payments SDK",
+    url: "https://payments.neplex.dev",
+    image: "https://payments.neplex.dev/logo.webp",
+    description: "Unified payments sdk for JavaScript/TypeScript.",
+  },
+   {
     title: "Discord Player",
     url: "https://discord-player.js.org",
     image: null,
@@ -29,22 +41,10 @@ export const projects: ContentCardProps[] = [
       "Discord Player is a robust framework for developing Discord Music bots using JavaScript and TypeScript.",
   },
   {
-    title: "OPPA",
-    url: "https://oppa.neplex.dev",
-    image: null,
-    description: "Open Printer Proxy Agent (OPPA) for reliable cloud-to-local printing.",
-  },
-  {
     title: "@neplex/vectorizer",
     url: "https://github.com/neplextech/vectorizer",
     image: null,
     description: "Fast Node.js library to convert raster images to svg",
-  },
-  {
-    title: "Payments SDK",
-    url: "https://payments.neplex.dev",
-    image: null,
-    description: "Unified payments sdk for JavaScript/TypeScript.",
   },
   {
     title: "redactive",
