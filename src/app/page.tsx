@@ -17,7 +17,7 @@ export default function Home() {
       <Shell title="Kunjan Dhungana">
         <div className="space-y-8 text-sm leading-7 text-neutral-400">
           <p>
-            Self-taught software engineer from Nepal and co-founder of{' '}
+            Self-taught software engineer from Nepal and co-founder & CTO of{' '}
             <ContentLink url="https://neplextech.com" name="Neplex" />, an
             independent product studio building open-source developer tools and
             infrastructure. I work primarily with TypeScript, Rust, and Node.js.
